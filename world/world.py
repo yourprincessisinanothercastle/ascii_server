@@ -35,8 +35,8 @@ class World:
     def tick(self, dt):
         for player in self.players:
             player.process_action_queue(dt)
-            player.update_field_of_view()
 
         for room in self.rooms:
+            room.update_field_of_view()
             for creature in room.creatures:
                 creature.process_action_queue(dt)

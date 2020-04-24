@@ -36,9 +36,6 @@ async def wshandler(request):
         app['state']['game_is_running'] = True
         asyncio.ensure_future(game_loop(app))
 
-    # init map for new player
-    player.update_field_of_view()
-
     await ws.prepare(request)
     await ws.send_str(json.dumps({
         'type': 'init',

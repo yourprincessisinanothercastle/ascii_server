@@ -1,3 +1,4 @@
+from util.field_of_view import fov
 from world.creatures._creature import Creature
 from world.creatures.player import Player
 from world.rooms.map import Map
@@ -12,6 +13,22 @@ class Room():
         self.creatures = []
 
         self.map_generator = map_generator
+        
+        self.field_of_view_needs_update = True
+
+    def reset_tiles_visible(self):
+        for y_coord, row in self.map.tiles.items():
+            for x_coord, tile in row.items():
+                tile.is_visible = False
+                tile.needs_update = True
+
+    def update_field_of_view(self):
+        if self.field_of_view_needs_update:
+            self.reset_tiles_visible()
+            for player in self.players:
+                logger.debug('updating fov')
+                fov(player.x, player.y, player.view_radius, self.map.update_visible)
+            self.field_of_view_needs_update = False
 
     def init(self):
         self.map = Map(self.map_generator)
