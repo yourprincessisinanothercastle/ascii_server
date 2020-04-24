@@ -1,5 +1,8 @@
 from world.rooms.map_generators._map_generator import _MapGenerator
 
+import logging
+logger = logging.getLogger(__name__)
+
 W = 'wall'
 F = 'floor'
 _ = None

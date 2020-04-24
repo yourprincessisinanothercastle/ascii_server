@@ -8,20 +8,24 @@ logger = logging.getLogger(__name__)
 
 
 class Map:
-    def __init__(self, generator=None):
+    def __init__(self, generator_class=None):
         self._layers = []
         # todo: doors, connections to other rooms
-        self.map = json.loads(generator().as_json())
-
+        generator = generator_class()
+        self.map = json.loads(generator.as_json())
         self.tiles = self._tiles_from_map_json()
 
     def _tiles_from_map_json(self):
         result = {}
-        for row_idx, row in enumerate(self.map):
+        
+        tiles = self.map['tiles']
+        for row_idx, row in enumerate(tiles):
+            result[row_idx] = {}
             for col_idx, col in enumerate(row):
-                tile_type_at_index = self.map[row_idx][col_idx]
+                tile_type_at_index = tiles[row_idx][col_idx]
                 tile_class_at_index = TILE_MAP[tile_type_at_index]
                 result[row_idx][col_idx] = tile_class_at_index()
+        
         return result
 
     def update_visible(self, x, y):
@@ -29,9 +33,11 @@ class Map:
         needed for fov
         '''
 
-        if y > len(self.tiles) - 1:
+
+        if y > len(self.tiles) - 1 or y < 0:
             return True
-        if x > len(self.tiles[y]) - 1:
+
+        if x > len(self.tiles[y]) - 1 or x < 0:
             return True
 
         self.tiles[y][x].is_visible = True

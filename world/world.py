@@ -25,7 +25,6 @@ class World:
 
     def add_player(self, player):
         self.players.append(player)
-        return player
 
     def tick(self, dt):
         for player in self.players:

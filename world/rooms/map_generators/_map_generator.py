@@ -8,7 +8,7 @@ todo: does it make sense to do it this way?
 
 class _MapGenerator:
     def __init__(self):
-        self.map = None
+        self.tiles = None
         self.layers = []
         self._player_spawn_areas = []
         self._monster_spawn_areas = []
@@ -19,13 +19,13 @@ class _MapGenerator:
             wall='#',
             floor='.'
         )
-        for row_idx, row in enumerate(self.map):
+        for row_idx, row in enumerate(self.tiles):
             drawn_row = [chars[tile] for tile in row]
             print(''.join(drawn_row))
 
     def as_json(self):
         return json.dumps(dict(
-            map=self.map,
+            tiles=self.tiles,
             player_spawn_areas=self._player_spawn_areas,
             monster_spawn_areas=self._monster_spawn_areas,
             items=[],

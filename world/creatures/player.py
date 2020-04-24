@@ -20,7 +20,7 @@ class Player(Creature):
         hit=.20
     )
 
-    def __init__(self):
+    def __init__(self, websocket):
         super().__init__(0, 0)
         self.direction = Creature.DIRECTIONS['left']
 
@@ -31,6 +31,8 @@ class Player(Creature):
         self.accuracy = 1
         self.strength = 1
         self.color = random.randint(0, 254)
+        
+        self.websocket = websocket
 
     @property
     def char(self):
