@@ -42,7 +42,7 @@ class Map:
         for y_coord, row in self.tiles.items():
             for x_coord, tile in row.items():
                 if tile.seen:
-                    serialized_tile = [((x_coord, y_coord), tile.serialize_attributes())]
+                    serialized_tile = [(x_coord, y_coord), tile.name, tile.serialize_attributes()]
                     result.append(serialized_tile)
         return result
 
@@ -58,15 +58,14 @@ class Map:
         for y_coord, row in self.tiles.items():
             for x_coord, tile in row.items():
                 if tile.seen and tile.needs_update:
-                    serialized_tile = [((x_coord, y_coord), tile.name, tile.serialize_attributes())]
+                    serialized_tile = [(x_coord, y_coord), tile.name, tile.serialize_attributes()]
                     result.append(serialized_tile)
         return result
-    
+
     def set_tile_update_sent(self):
         for y_coord, row in self.tiles.items():
             for x_coord, tile in row.items():
                 tile.needs_update = False
-                    
 
     def update_visible(self, x, y):
         '''
@@ -81,6 +80,7 @@ class Map:
 
         self.tiles[y][x].is_visible = True
         self.tiles[y][x].seen = True
+        self.tiles[y][x].needs_update = True
 
         return self.tiles[y][x].block_sight
 

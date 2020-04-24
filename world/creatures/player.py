@@ -1,5 +1,6 @@
 import logging
 import random
+import uuid
 
 from util.field_of_view import fov
 from world.creatures._creature import Creature
@@ -31,6 +32,9 @@ class Player(Creature):
         self.websocket = websocket
         self.update_sent = False
 
+        self.uid = uuid.uuid4()
+        self.color = random.randint(0, 255)
+
     @property
     def char(self):
         return Player.CHARS[self.direction]
@@ -43,21 +47,12 @@ class Player(Creature):
 
     def move(self, dx, dy):
         target_tile = self.room.map.tiles[self.y + dy][self.x + dx]
-        if dx > 0:
-            new_direction = Player.DIRECTIONS['right']
-        elif dx < 0:
-            new_direction = Player.DIRECTIONS['left']
-        elif dy > 0:
-            new_direction = Player.DIRECTIONS['down']
-        else:
-            new_direction = Player.DIRECTIONS['up']
-
-        if self.direction != new_direction:
-            self.direction = new_direction
-            return
+        logger.info('moving to %s %s' % (self.x + dx, self.y + dy))
 
         if not target_tile.blocked:
+            logger.info('setting fov update')
             self.fov_needs_update = True
+            self.update_sent = False
 
             self.x += dx
             self.y += dy
@@ -75,24 +70,39 @@ class Player(Creature):
                     tile.is_visible = False
             fov(self.x, self.y, self.view_radius, self.room.map.update_visible)
             self.fov_needs_update = False
-    
-    def _get_client_info(self):
+
+    def get_client_info(self):
         return {
-            'coords': (self.x, self.y)
+            'coords': (self.x, self.y),
+            'color': self.color
         }
 
     def get_client_init_data(self):
         map = self.room.map.serialize_init_state()
         return {
-            'self': self._get_client_info(),
-            'map': map
+            'self': self.get_client_info(),
+            'map': map,
+            'players': {str(player.uid): player.get_client_info() for player in self.room.players if player is not self}
         }
 
     def get_client_update_data(self):
         update_package = {}
         update_package['map'] = self.room.map.serialize_update_state()
         if not self.update_sent:
-            update_package['self'] = self._get_client_info()
+            update_package['self'] = self.get_client_info()
             self.update_sent = True
-        
+        update_package['players'] = {str(player.uid): player.get_client_info() for player in self.room.players if player is not self}
         return update_package
+
+    def update(self, actions):
+        for action in actions:
+            if action == 'up':
+                self.add_action(self.move, 0, -1)
+            elif action == 'down':
+                self.add_action(self.move, 0, 1)
+            elif action == 'left':
+                self.add_action(self.move, -1, 0)
+            elif action == 'right':
+                self.add_action(self.move, 1, 0)
+            else:
+                logger.warning('unknown action %s' % action)

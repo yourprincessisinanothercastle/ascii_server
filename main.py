@@ -40,13 +40,19 @@ async def wshandler(request):
     player.update_field_of_view()
 
     await ws.prepare(request)
-    await ws.send_str(json.dumps({'init': player.get_client_init_data()}))
+    await ws.send_str(json.dumps({
+        'type': 'init',
+        'data': player.get_client_init_data()}))
 
     try:
         async for msg in ws:
             if msg.type == web.WSMsgType.text:
+                packet = json.loads(msg.data)
+                logger.debug(json.dumps(packet, indent=2))
+                if packet['type'] == 'actions':
+                    player.update(packet['data'])
                 print("Got message %s" % msg.data)
-                await ws.send_str("Pressed key code: {}".format(msg.data))
+                # await ws.send_str("Pressed key code: {}".format(msg.data))
             elif msg.type == web.WSMsgType.close or \
                     msg.type == web.WSMsgType.error:
                 print("Closed connection")
@@ -55,7 +61,7 @@ async def wshandler(request):
                 print(msg)
 
     except Exception as e:
-        logger.error(e)
+        logger.error(e, exc_info=True)
 
     finally:
         app['world'].remove_player(player)
@@ -70,16 +76,17 @@ async def wshandler(request):
 
 
 async def game_loop(app):
-    TICK_TIME = .5
+    TICK_TIME = 1 / 20
 
     while 1:
         app['world'].tick(TICK_TIME)
+
         for player in app["players"]:
             player: Player
             ex = player.websocket.exception()
             if ex:
                 logger.error("exception: %s" % ex)
-            await player.websocket.send_str(json.dumps({'update': player.get_client_update_data()}))
+            await player.websocket.send_str(json.dumps({'type': 'update', 'data': player.get_client_update_data()}))
 
         if not app["players"]:
             break

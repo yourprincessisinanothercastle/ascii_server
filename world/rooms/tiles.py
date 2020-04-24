@@ -14,7 +14,7 @@ class Tile:
 
         :return: 
         """
-        return (self.seen, self.is_visible)
+        return self.seen, self.is_visible
         
         
 class Wall(Tile):
