@@ -1,20 +1,23 @@
 from world.creatures._creature import Creature
 from world.creatures.player import Player
 from world.rooms.map import Map
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Room():
     def __init__(self, map_generator):
         self.map: Map = None
         self.players = []
         self.creatures = []
-        
+
         self.map_generator = map_generator
 
     def init(self):
         self.map = Map(self.map_generator)
 
     def remove_player(self, player: Player):
+        logger.info('removing %s from room %s' % (player, self))
         self.players.remove(player)
         player.room = None
 
@@ -23,6 +26,7 @@ class Room():
         creature.room = None
 
     def spawn_player(self, player: Player):
+        logger.info('adding %s to room %s' % (player, self))
         if player.room:
             player.room.remove_player(player)
         player.room = self

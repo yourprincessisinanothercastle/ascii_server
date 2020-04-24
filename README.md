@@ -37,8 +37,7 @@
             stats: {is_visible: True}
         },{
             type: 'floor'
-            coords: (x, y)
-            stats: {is_visible: True}
+            coords: [(x, y, {})]
         }
     players: [
         {

@@ -25,19 +25,18 @@ class World:
 
     def add_player(self, player):
         self.players.append(player)
+        self.start_room.spawn_player(player)
+        
+    def remove_player(self, player):
+        if player.room:
+            player.room.remove_player(player)
+        self.players.remove(player)
 
     def tick(self, dt):
         for player in self.players:
-            player.process_action_queue(dt)    
-            if player.fov_needs_update:
-                logger.debug('updating fov')
-                for idx_row, row in enumerate(player.room.map.tiles):
-                    for idx_column, column in enumerate(player.room.map.tiles[idx_row]):
-                        player.room.map.tiles[idx_row][idx_column].is_visible = False
-                fov(player.x, player.y, player.view_radius, player.room.map.update_visible)
-                player.fov_needs_update = False
-        
+            player.process_action_queue(dt)
+            player.update_field_of_view()
+
         for room in self.rooms:
             for creature in room.creatures:
                 creature.process_action_queue(dt)
-

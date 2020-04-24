@@ -1,6 +1,7 @@
 import logging
 import random
 
+from util.field_of_view import fov
 from world.creatures._creature import Creature
 from world.creatures.projectile import Projectile
 
@@ -26,13 +27,9 @@ class Player(Creature):
 
         self.fov_needs_update = True
         self.view_radius = 10
-        
-        self.speed = 1
-        self.accuracy = 1
-        self.strength = 1
-        self.color = random.randint(0, 254)
-        
+
         self.websocket = websocket
+        self.update_sent = False
 
     @property
     def char(self):
@@ -64,9 +61,38 @@ class Player(Creature):
 
             self.x += dx
             self.y += dy
-        
+
     def shoot(self):
         p = Projectile()
         p.shoot(self.direction)
         self.room.spawn_creature(p, self.x, self.y)
+
+    def update_field_of_view(self):
+        if self.fov_needs_update:
+            logger.debug('updating fov')
+            for y_coord, row in self.room.map.tiles.items():
+                for x_coord, tile in row.items():
+                    tile.is_visible = False
+            fov(self.x, self.y, self.view_radius, self.room.map.update_visible)
+            self.fov_needs_update = False
+    
+    def _get_client_info(self):
+        return {
+            'coords': (self.x, self.y)
+        }
+
+    def get_client_init_data(self):
+        map = self.room.map.serialize_init_state()
+        return {
+            'self': self._get_client_info(),
+            'map': map
+        }
+
+    def get_client_update_data(self):
+        update_package = {}
+        update_package['map'] = self.room.map.serialize_update_state()
+        if not self.update_sent:
+            update_package['self'] = self._get_client_info()
+            self.update_sent = True
         
+        return update_package
