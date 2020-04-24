@@ -1,4 +1,17 @@
 
+## setup
+
+    virtualenv env
+    env/bin/activate
+    pip install -r requirements.txt
+
+
+## trying out map generators
+
+    python main.py gen-map GENRATORNAME
+    python main.py gen-map dummy
+
+
 ## protocol
 
     
