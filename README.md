@@ -17,44 +17,64 @@
     
     Client                  Server
            join->
-                 <-room_init
+                 <-init
            key_press->
-               <-room_update 
+               <-update 
            key_press->
-               <-room_update
+               <-update
+               
+               # player disconnect
+               
+
+#### init
+    
+    type: init
+    data: 
+        self: 
+            coords: (0, 0)
+            color: 254
+        map:
+          - - (0, 0)
+            - 'wall'
+            - true, true  # seen, is_visible
+          - - (3, 1)
+            - 'floor'
+            - true, false  # seen, is_visible
+          ...
+        players:
+            uid123: 
+                coords: (0, 0)
+                color: 254
+            uid234: 
+                coords: (0, 0)
+                color: 254
+        creatures:
+            uid345:
+                type: blob
+                coords: (0, 0)
+                is_visible: true,
+                color: 254
+
+#### update
+
+same as init, but only changes
+    
+    type: update
+    data: ...
 
 
-#### room_init
+#### remove_players
 
-    tiles: [
-        {
-            type: 'wall'
-            coords: (x, y)
-            stats: {is_visible: True}
-        },{
-            type: 'wall'
-            coords: (x, y)
-            stats: {is_visible: True}
-        },{
-            type: 'floor'
-            coords: [(x, y, {})]
-        }
-    players: [
-        {
-            name: ''
-            coords: (x, y)
-            stats...
-        }
-    ]
-    creatures: []
+since update just sends the updates, and a non-existing player would not be part od the update, we need to remove them explicitly
 
+    type: remove_players
+    data: 
+        - uid1
+        - uid2
+           ...
 
-#### room_update
-    tiles: [
-        # new tiles
-    ]
-    players: [
-         # updated players
-    ]
+#### remove_creatures
 
-
+    type: remove_creatures
+    data:
+        - uid42

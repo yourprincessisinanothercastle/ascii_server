@@ -6,6 +6,8 @@ from world.level.tile import TILE_MAP, Tile
 
 logger = logging.getLogger(__name__)
 
+TILE_SIZE = 3
+
 
 class Map:
     def __init__(self, generator_class=None):
@@ -21,13 +23,20 @@ class Map:
         result = {}
 
         tiles = self._map['tiles']
-        for row_idx, row in enumerate(tiles):
-            result[row_idx] = {}
-            for col_idx, col in enumerate(row):
-                tile_type_at_index = tiles[row_idx][col_idx]
-                tile_class_at_index = TILE_MAP[tile_type_at_index]
-                result[row_idx][col_idx] = tile_class_at_index()
+        for map_row_idx, row in enumerate(tiles):
+            # scale up in height
+            for x in range(TILE_SIZE):
+                tile_row_idx = map_row_idx * TILE_SIZE + x
+                result[tile_row_idx] = {}
 
+                for map_col_idx, col in enumerate(row):
+                    # scale up in width
+                    for y in range(TILE_SIZE):
+                        tile_col_idx = map_col_idx * TILE_SIZE + y
+                        tile_type_at_index = tiles[map_row_idx][map_col_idx]
+                        tile_class_at_index = TILE_MAP[tile_type_at_index]
+
+                        result[tile_row_idx][tile_col_idx] = tile_class_at_index()
         return result
 
     def serialize_init_state(self):
@@ -86,7 +95,7 @@ class Map:
     def _random_coords(self, x1_y1, x2_y2):
         x1, y1 = x1_y1
         x2, y2 = x2_y2
-        return random.randint(x1, x2), random.randint(y1, y2)
+        return random.randint(x1 * TILE_SIZE, x2 * TILE_SIZE), random.randint(y1 * TILE_SIZE, y2 * TILE_SIZE)
 
     def get_player_spawn(self):
         random_spawn_area = random.choice(self._map['player_spawn_areas'])
@@ -94,7 +103,7 @@ class Map:
         return self._random_coords(*random_spawn_area)
 
     def get_creature_spawn(self):
-        random_spawn_area = random.choice(self._map['creature_spawn_areas'])
+        random_spawn_area = random.choice(self._map['monster_spawn_areas'])
         return self._random_coords(*random_spawn_area)
 
     def draw(self):
