@@ -65,11 +65,20 @@ class Player(Creature):
 
     def get_client_update_data(self):
         update_package = {}
-        update_package['map'] = self.room.map.serialize_update_state()
+        map_update = self.room.map.serialize_update_state()
+        if map_update:
+            update_package['map'] = map_update
+
         if not self.update_sent:
             update_package['self'] = self.get_client_info()
-            self.update_sent = True
-        update_package['players'] = {str(player.uid): player.get_client_info() for player in self.room.players if player is not self}
+
+        players_update = {str(player.uid): player.get_client_info()
+                          for player in self.room.players
+                          if player is not self
+                          and player.update_sent is False}
+
+        if players_update:
+            update_package['players'] = players_update
         return update_package
 
     def update(self, actions):

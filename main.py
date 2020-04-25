@@ -64,10 +64,8 @@ async def wshandler(request):
         app['world'].remove_player(player)
         await player.websocket.close()
         app['players'].remove(player)
-
+        app['players_left'].append(player)
         print('%s disconnected' % player)
-
-    app["players"].remove(player)
 
     return ws
 
@@ -83,7 +81,21 @@ async def game_loop(app):
             ex = player.websocket.exception()
             if ex:
                 logger.error("exception: %s" % ex)
-            await player.websocket.send_str(json.dumps({'type': 'update', 'data': player.get_client_update_data()}))
+            update_data = player.get_client_update_data()
+            if update_data:
+                await player.websocket.send_str(json.dumps({'type': 'update', 'data': update_data}))
+
+        for player in app["players"]:
+            player.update_sent = True
+
+        if app['players_left']:
+            logger.info('sending remove_player for %s' % app['players_left'])
+            for player in app['players']:
+                await player.websocket.send_str(
+                    json.dumps(
+                        {'type': 'remove_player',
+                         'data': [str(left_player.uid) for left_player in app['players_left']]}))
+            app['players_left'] = []
 
         if not app["players"]:
             break
@@ -103,6 +115,10 @@ def create_app():
     app['world'] = World()
 
     app['players'] = []
+
+    # temp storage for players who left the game
+    app['players_left'] = []
+
     app['state']['game_is_running'] = False
 
     app.router.add_route('GET', '/connect', wshandler)
