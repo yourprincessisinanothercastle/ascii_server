@@ -2,6 +2,7 @@ import logging
 import random
 import uuid
 
+from util.field_of_view import fov
 from world.creatures._creature import Creature
 from world.creatures.projectile import Projectile
 
@@ -9,6 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class Player(Creature):
+    HITBOX = [
+        [None, None, None],
+        ['X', 'X', 'X'],
+        ['X', 'X', 'X'],
+    ]
+    
+    FOV_OFFSET = (1, 1)
+    
     ACTION_TIME = dict(
         move=.10,
         hit=.20
@@ -32,11 +41,22 @@ class Player(Creature):
         self.action_queue.append(action)
         self.action_queue = self.action_queue[:3]
 
+    def update_fov(self):
+        fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.room.map.update_visible)
+
     def move(self, dx, dy):
-        target_tile = self.room.map.tiles[self.y + dy][self.x + dx]
+        collision = False
+        for row_idx, row in enumerate(self.HITBOX):
+            for col_idx, col in enumerate(row):
+                if col:  # dont collide on Nones
+                    target_tile = self.room.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
+                    if target_tile.blocked:
+                        collision = True
+                        break
+        
         logger.info('moving to %s %s' % (self.x + dx, self.y + dy))
 
-        if not target_tile.blocked:
+        if not collision:
             logger.info('setting fov update')
             self.room.field_of_view_needs_update = True
             self.update_sent = False

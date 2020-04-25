@@ -27,7 +27,7 @@ class Room():
             self.reset_tiles_visible()
             for player in self.players:
                 logger.debug('updating fov')
-                fov(player.x, player.y, player.view_radius, self.map.update_visible)
+                player.update_fov()
             self.field_of_view_needs_update = False
 
     def init(self):
