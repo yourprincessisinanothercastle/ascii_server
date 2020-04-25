@@ -1,4 +1,4 @@
-class Thing:
+class Entity:
     '''
     something that has coords on a map
     '''

@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import TYPE_CHECKING, Tuple, List
 
-from world.thing import Thing
+from world.entity import Entity
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from world.level.level import Level
 
 
-class Creature(Thing):
+class Creature(Entity):
     '''
     something that could move every tick
     '''
