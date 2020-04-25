@@ -6,7 +6,7 @@ from world.thing import Thing
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from world.rooms.room import Room
+    from world.level.level import Level
 
 
 
@@ -24,7 +24,7 @@ class Creature(Thing):
 
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.room: Room = None
+        self.room: Level = None
         self.x = 0
         self.y = 0
 

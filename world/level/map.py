@@ -2,17 +2,16 @@ import json
 import logging
 import random
 
-from world.rooms.tiles import TILE_MAP, Tile
+from world.level.tile import TILE_MAP, Tile
 
 logger = logging.getLogger(__name__)
 
 
 class Map:
     def __init__(self, generator_class=None):
-        self._layers = []
-        # todo: doors, connections to other rooms
+        # todo: doors, connections to other level
         generator = generator_class()
-        self._map = json.loads(generator.as_json())
+        self._map = generator.get_map()
         self.tiles = self._tiles_from_map_json()
 
     def get_tile(self, row, col) -> Tile:

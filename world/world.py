@@ -2,8 +2,8 @@ import logging
 from typing import List
 
 from util.field_of_view import fov
-from world.rooms.map_generators import DummyGenerator
-from world.rooms.room import Room
+from world.level.generators.area import Squ
+from world.level.level import Level
 
 logger = logging.getLogger(__name__)
 
@@ -11,15 +11,15 @@ logger = logging.getLogger(__name__)
 class World:
     def __init__(self):
         self.players = []
-        self.rooms: List[Room] = []
-        self.start_room: Room = None
+        self.rooms: List[Level] = []
+        self.start_room: Level = None
 
         self.structure = None
 
         self.init_world()
 
     def init_world(self):
-        self.start_room = Room(DummyGenerator)
+        self.start_room = Level(DummyGenerator)
         self.start_room.init()
         self.rooms.append(self.start_room)
 

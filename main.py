@@ -8,7 +8,7 @@ from pip._internal.utils import logging
 
 from init_logging import init_logging
 from world.creatures.player import Player
-from world.rooms.map_generators import generators
+from world.level.generators import generators
 from world.world import World
 
 init_logging('debug')

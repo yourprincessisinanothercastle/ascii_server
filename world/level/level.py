@@ -1,12 +1,12 @@
 from util.field_of_view import fov
 from world.creatures._creature import Creature
 from world.creatures.player import Player
-from world.rooms.map import Map
+from world.level.map import Map
 import logging
 
 logger = logging.getLogger(__name__)
 
-class Room():
+class Level():
     def __init__(self, map_generator):
         self.map: Map = None
         self.players = []
@@ -34,7 +34,7 @@ class Room():
         self.map = Map(self.map_generator)
 
     def remove_player(self, player: Player):
-        logger.info('removing %s from room %s' % (player, self))
+        logger.info('removing %s from area %s' % (player, self))
         self.players.remove(player)
         player.room = None
 
@@ -43,7 +43,7 @@ class Room():
         creature.room = None
 
     def spawn_player(self, player: Player):
-        logger.info('adding %s to room %s' % (player, self))
+        logger.info('adding %s to area %s' % (player, self))
         if player.room:
             player.room.remove_player(player)
         player.room = self
