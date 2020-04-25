@@ -1,5 +1,6 @@
 from util.field_of_view import fov
 from world.creatures._creature import Creature
+from world.creatures.blob import Blob
 from world.creatures.player import Player
 from world.rooms.map import Map
 import logging
@@ -16,15 +17,26 @@ class Room():
         
         self.field_of_view_needs_update = True
 
-    def reset_tiles_visible(self):
+    def _reset_tiles_visible(self):
+        """
+        part of update_field_of_view
+        resets all tiles to not visible
+        
+        :return: 
+        """
         for y_coord, row in self.map.tiles.items():
             for x_coord, tile in row.items():
                 tile.is_visible = False
                 tile.needs_update = True
 
     def update_field_of_view(self):
+        """
+        update all tiles to current is_visible status
+
+        :return: 
+        """
         if self.field_of_view_needs_update:
-            self.reset_tiles_visible()
+            self._reset_tiles_visible()
             for player in self.players:
                 logger.debug('updating fov')
                 player.update_fov()
@@ -32,6 +44,9 @@ class Room():
 
     def init(self):
         self.map = Map(self.map_generator)
+        
+        # todo: base on data from generator
+        self.spawn_creature(Blob())
 
     def remove_player(self, player: Player):
         logger.info('removing %s from room %s' % (player, self))
@@ -52,10 +67,14 @@ class Room():
         player.set_coords(x, y)
 
     def spawn_creature(self, creature: Creature, x=None, y=None):
+        if not x or y:
+            x, y = self.map.get_creature_spawn()
+        logger.info('spawning %s at (%s, %s)' % (creature, x, y))
+
         if creature.room:
             creature.room.remove_creature(creature)
+
         creature.room = self
         self.creatures.append(creature)
-        if not x and y:
-            x, y = self.map.random_creature_spawn()
+
         creature.set_coords(x, y)

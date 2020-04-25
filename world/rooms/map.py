@@ -104,7 +104,7 @@ class Map:
         return self._random_coords(*random_spawn_area)
 
     def get_creature_spawn(self):
-        random_spawn_area = random.choice(self._map['creature_spawn_areas'])
+        random_spawn_area = random.choice(self._map['monster_spawn_areas'])
         return self._random_coords(*random_spawn_area)
 
     def draw(self):
