@@ -1,9 +1,5 @@
-from enum import Enum
-TILE_TYPE = Enum('TILE_TYPE', 'wall floor')
-
 class Tile:
-    name = ''
-    type: TILE_TYPE = None
+    name = None
     blocked = False
     block_sight = False
 

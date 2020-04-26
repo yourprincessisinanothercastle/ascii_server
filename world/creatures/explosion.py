@@ -19,4 +19,4 @@ class Explosion(Creature):
         )
 
     def die(self):
-        self.room.remove_creature(self)
+        self.floor.remove_entity(self)

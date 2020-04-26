@@ -80,12 +80,12 @@ class Projectile(Creature):
 
     def explode(self):
         explosion = Explosion()
-        self.room.spawn_creature(explosion, self.x, self.y)
+        self.floor.spawn_creature(explosion, self.x, self.y)
         explosion.add_action(explosion.die)
-        self.room.remove_creature(self)
+        self.floor.remove_entity(self)
 
     def move(self, dx, dy):
-        target_tile = self.room.map.tiles[self.y + dy][self.x + dx]
+        target_tile = self.floor.map.tiles[self.y + dy][self.x + dx]
 
         if not target_tile.blocked:
             self.x += dx

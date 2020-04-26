@@ -1,31 +1,32 @@
-import json
-import logging
 import random
-
+from typing import Type, List
+from world.entity import Entity
 from world.level.tile import TILE_MAP, Tile
-from world.level.creation import igenerator, GeneratorOutput
+from world.level.creation import IGenerator, GeneratorOutput
 
+import logging
 logger = logging.getLogger(__name__)
 
 TILE_SIZE = 3
 
 
 class Map:
-    def __init__(self, generator_class=None):
+    def __init__(self, generator_class: Type[IGenerator] = None):
         # todo: connections between levels
-        map_generator: igenerator = generator_class()
+        map_generator: IGenerator = generator_class()
         self._map: GeneratorOutput = map_generator.generate()
-        self.tiles = self._tiles_from_map_json()
+        self.entities: List[Entity] = self._map.entities
+        self.tiles: dict = self._tiles_from_map_json()
 
     def get_tile(self, row, col) -> Tile:
         return self.tiles[row][col]
 
-    def _tiles_from_map_json(self):
+    def _tiles_from_map_json(self) -> dict:
         result = {}
 
         for map_row_idx, row in enumerate(self._map.tiles):
-            # scale up in height
             for x in range(TILE_SIZE):
+                # scale up in height
                 tile_row_idx = map_row_idx * TILE_SIZE + x
                 result[tile_row_idx] = {}
 
@@ -98,14 +99,8 @@ class Map:
         return random.randint(x1 * TILE_SIZE, x2 * TILE_SIZE), random.randint(y1 * TILE_SIZE, y2 * TILE_SIZE)
 
     def get_player_spawn(self):
-        # TODO fix for new generator output
-        random_spawn_area = random.choice(self._map['player_spawn_areas'])
+        random_spawn_area = random.choice(self._map.player_spawn_areas)
         print(random_spawn_area)
-        return self._random_coords(*random_spawn_area)
-
-    def get_creature_spawn(self):
-        # TODO fix for new generator output
-        random_spawn_area = random.choice(self._map['monster_spawn_areas'])
         return self._random_coords(*random_spawn_area)
 
     def draw(self):

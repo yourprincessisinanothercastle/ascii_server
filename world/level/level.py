@@ -1,4 +1,5 @@
 from typing import List, NamedTuple
+from world.entity import Entity
 from world.creatures import Creature, Blob, Player
 from world.level.map import Map
 
@@ -18,6 +19,7 @@ class Level:
     def __init__(self, map_generator):
         self.players = []
         self.creatures = []
+        self.entities = []
 
         self.map_generator = map_generator
         
@@ -50,37 +52,30 @@ class Level:
 
     def init(self):
         self.map = Map(self.map_generator)
-        
-        # todo: base on data from generator
-        self.spawn_creature(Blob())
+        for entity in self.map.entities:
+            # todo: base on data from generator
+            self.spawn_entity(entity)
 
-    def remove_player(self, player: Player):
-        logger.info('removing %s from area %s' % (player, self))
-        self.players.remove(player)
-        player.room = None
 
-    def remove_creature(self, creature: Creature):
-        self.creatures.remove(creature)
-        creature.room = None
+    def remove_entity(self, entity: Entity):
+        logger.info('removing entity %s from level: %s' % (entity, self))
+        self.entities.remove(entity)
+        entity.floor = None
+
+    def spawn_entity(self, entity: Entity):
+        logger.info('adding entity %s to level: %s' % (entity, self))
+        # this will only attach an entity to current game-level, coordinates are already generated
+        # TODO add func to spawn entity at player spawn areas if they somehow move between levels
+        if entity.floor:
+            entity.floor.remove_entity(entity)
+        entity.floor = self
+        self.entities.append(entity)
 
     def spawn_player(self, player: Player):
-        logger.info('adding %s to area %s' % (player, self))
-        if player.room:
-            player.room.remove_player(player)
-        player.room = self
+        logger.info('adding player %s to level %s' % (player, self))
+        if player.floor:
+            player.floor.remove_entity(player)
+        player.floor = self
         self.players.append(player)
         x, y = self.map.get_player_spawn()
         player.set_coords(x, y)
-
-    def spawn_creature(self, creature: Creature, x=None, y=None):
-        if not x or y:
-            x, y = self.map.get_creature_spawn()
-        logger.info('spawning %s at (%s, %s)' % (creature, x, y))
-
-        if creature.room:
-            creature.room.remove_creature(creature)
-
-        creature.room = self
-        self.creatures.append(creature)
-
-        creature.set_coords(x, y)

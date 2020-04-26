@@ -1,4 +1,4 @@
-from typing import List
+from typing import TYPE_CHECKING, List
 from world.entity import Entity
 from world.level.creation import IGenerator, GeneratorOutput
 from world.level.creation.area.entity import EntityBudget, EntityGenerator
@@ -29,5 +29,18 @@ class AreaGenerator(IGenerator):
 
     # implement in subclass
     def _generate_tiles(self) -> List[List[str]]:
-        raise NotImplementedError
+        W = 'wall'
+        F = 'floor'
+
+        return [
+            [W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W],
+            [W, F, F, F, F, F, F, F, F, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
+            [W, F, F, F, F, F, F, F, F, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
+            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
+            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
+            [W, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, W],
+            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
+            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
+            [W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W],
+        ]
 

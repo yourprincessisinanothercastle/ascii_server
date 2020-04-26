@@ -3,6 +3,8 @@ from world.entity import Entity
 from world.creatures import Creature
 from world.level.creation import IGenerator
 
+from world.creatures import BESTIARY
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -24,5 +26,5 @@ class EntityGenerator(IGenerator):
                  has_exit: bool = False) -> List[Entity]:
 
         return [
-
+            BESTIARY.blob(4, 4)
         ]

@@ -9,32 +9,32 @@ logger = logging.getLogger(__name__)
 class World:
     def __init__(self):
         self.players = []
-        self.rooms: List[Level] = []
-        self.start_room: Level = None
+        self.levels: List[Level] = []
+        self.start_level: Level = None
 
         self.structure = None
 
         self.init_world()
 
     def init_world(self):
-        self.start_room = Level(SquareRoom)  # TODO fix to use the level_generator
-        self.start_room.init()
-        self.rooms.append(self.start_room)
+        self.start_level = Level(SquareRoom)  # TODO fix to use the level_generator
+        self.start_level.init()
+        self.levels.append(self.start_level)
 
     def add_player(self, player):
         self.players.append(player)
-        self.start_room.spawn_player(player)
+        self.start_level.spawn_player(player)
         
     def remove_player(self, player):
-        if player.room:
-            player.room.remove_player(player)
+        if player.floor:
+            player.floor.remove_entity(player)
         self.players.remove(player)
 
     def tick(self, dt):
         for player in self.players:
             player.process_action_queue(dt)
 
-        for room in self.rooms:
-            room.update_field_of_view()
-            for creature in room.creatures:
+        for level in self.levels:
+            level.update_field_of_view()
+            for creature in level.creatures:
                 creature.process_action_queue(dt)

@@ -40,14 +40,14 @@ class Player(Creature):
         self.action_queue = self.action_queue[:3]
 
     def update_fov(self):
-        fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.room.map.update_visible)
+        fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.floor.map.update_visible)
 
     def move(self, dx, dy):
         collision = False
         for row_idx, row in enumerate(self.HITBOX):
             for col_idx, col in enumerate(row):
                 if col:  # dont collide on Nones
-                    target_tile = self.room.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
+                    target_tile = self.floor.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
                     if target_tile.blocked:
                         collision = True
                         break
@@ -56,7 +56,7 @@ class Player(Creature):
 
         if not collision:
             logger.info('setting fov update')
-            self.room.field_of_view_needs_update = True
+            self.floor.field_of_view_needs_update = True
             self.update_sent = False
 
             self.x += dx
@@ -65,7 +65,7 @@ class Player(Creature):
     def shoot(self):
         p = Projectile()
         p.shoot(self.direction)
-        self.room.spawn_creature(p, self.x, self.y)
+        self.floor.spawn_creature(p, self.x, self.y)
 
     def get_client_info(self):
         return {
@@ -76,16 +76,16 @@ class Player(Creature):
     def get_client_init_data(self):
         return {
             'self': self.get_client_info(),
-            'map': self.room.map.serialize_init_state(),
-            'players': {str(player.uid): player.get_client_info() for player in self.room.players if
+            'map': self.floor.map.serialize_init_state(),
+            'players': {str(player.uid): player.get_client_info() for player in self.floor.players if
                         player is not self},
-            'creatures': {str(creature.uid): creature.get_client_info() for creature in self.room.creatures if
+            'creatures': {str(creature.uid): creature.get_client_info() for creature in self.floor.creatures if
                           creature.get_client_info()}
         }
 
     def get_client_update_data(self):
         update_package = {}
-        map_update = self.room.map.serialize_update_state()
+        map_update = self.floor.map.serialize_update_state()
         if map_update:
             update_package['map'] = map_update
 
@@ -93,13 +93,13 @@ class Player(Creature):
             update_package['self'] = self.get_client_info()
 
         players_update = {str(player.uid): player.get_client_info()
-                          for player in self.room.players
+                          for player in self.floor.players
                           if player is not self
                           and player.update_sent is False}
         if players_update:
             update_package['players'] = players_update
 
-        creatures_update = {str(creature.uid): creature.get_client_info() for creature in self.room.creatures if
+        creatures_update = {str(creature.uid): creature.get_client_info() for creature in self.floor.creatures if
                             creature.get_client_info()
                             and creature.update_sent is False}
 

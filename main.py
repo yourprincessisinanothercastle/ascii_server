@@ -100,7 +100,7 @@ async def game_loop(app):
         if not app["players"]:
             break
 
-        for room in app['world'].rooms:
+        for room in app['world'].levels:
             room.map.set_tile_update_sent()
 
         await asyncio.sleep(TICK_TIME)
