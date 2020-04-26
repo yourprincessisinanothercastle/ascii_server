@@ -1,5 +1,4 @@
 import json
-from collections import namedtuple
 
 import click
 import asyncio
@@ -8,7 +7,7 @@ from pip._internal.utils import logging
 
 from init_logging import init_logging
 from world.creatures.player import Player
-from world.level.creation import generators
+from world.level.creation.area import area_generators
 from world.world import World
 
 init_logging('debug')
@@ -140,7 +139,7 @@ def run():
 @cli.command()
 @click.argument('generator_name')
 def gen_map(generator_name):
-    generator = generators[generator_name]
+    generator = area_generators[generator_name]
     generator().draw()
 
 

@@ -13,7 +13,7 @@ class AreaGenerator(IGenerator):
     It could be a square room with only blob monsters or a large open area with diverse enemies.
     """
     # noinspection PyMethodOverriding
-    def generate(self, entity_budget: EntityBudget,
+    def generate(self, entity_budget: EntityBudget = EntityBudget(),
                  player_spawn_count: int = 0, has_exit: bool = False) -> GeneratorOutput:
         """ Starts generating an area subset of a level """
         self._tiles = self._generate_tiles()
