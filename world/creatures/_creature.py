@@ -46,6 +46,8 @@ class Creature(Entity):
         self.uid = uuid.uuid4()
         self.update_sent = False
         self.last_seen_at = None  # (0, 0)
+        
+        self.direction = 'right'
 
     def is_visible(self):
         for row_idx, row in enumerate(self.HITBOX):
@@ -60,7 +62,7 @@ class Creature(Entity):
     @property
     def current_tile(self):
         return self.room.map.tiles[self.y][self.x]
-    
+
     def collides_with_coords(self, x, y):
         """
         test own hitbox against collision on x, y
@@ -68,7 +70,7 @@ class Creature(Entity):
         :param x: 
         :param y: 
         :return: 
-        """ 
+        """
         for row_idx, row in enumerate(self.HITBOX):
             for col_idx, col in enumerate(row):
                 if col:
@@ -92,7 +94,6 @@ class Creature(Entity):
                     if collides:
                         return True
         return False
-        
 
     def move(self, dx, dy):
         collision = False
@@ -127,10 +128,14 @@ class Creature(Entity):
             'type': self.type,
             'coords': coords,
             'is_visible': is_visible,
-            'color': self.color
+            'color': self.color,
+            'sprite_state': self.get_sprite_state()
         }
 
-
+    def get_sprite_state(self):
+        if self.current_action:
+            return self.current_action[0].__name__
+        return 'idle'
 
     def process_action_queue(self, time_delta: float):
         """

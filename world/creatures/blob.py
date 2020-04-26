@@ -69,9 +69,9 @@ class Blob(Creature):
         if not self.action_queue:
             logger.info('updating blob')
             closest_player: Player = self.get_closest_player()
-            logger.info('closest player: %s, %s' % (closest_player.x, closest_player.y))
-            logger.info('self: %s, %s' % (self.x, self.y))
             if closest_player:
+                logger.info('closest player: %s, %s' % (closest_player.x, closest_player.y))
+                logger.info('self: %s, %s' % (self.x, self.y))
                 if self.collides_with_entity(closest_player):
                     logger.info('hit!')
                     self.add_action(self.hit)

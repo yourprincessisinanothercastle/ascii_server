@@ -16,6 +16,8 @@ class Player(Creature):
         ['X', 'X', 'X'],
         ['X', 'X', 'X'],
     ]
+    
+    BASE = (1, 2)
 
     FOV_OFFSET = (1, 1)
 
@@ -73,7 +75,8 @@ class Player(Creature):
         return {
             'coords': (self.x, self.y),
             'color': self.color,
-            'hit_points': self.hit_points
+            'hit_points': self.hit_points,
+            'sprite_state': self.get_sprite_state()
         }
 
     def get_client_init_data(self):
@@ -83,7 +86,7 @@ class Player(Creature):
             'players': {str(player.uid): player.get_client_info() for player in self.room.players if
                         player is not self},
             'creatures': {str(creature.uid): creature.get_client_info() for creature in self.room.creatures if
-                          creature.get_client_info()}
+                          creature.get_client_info()},
         }
 
     def get_client_update_data(self):
