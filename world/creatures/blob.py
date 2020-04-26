@@ -3,7 +3,7 @@ import random
 import uuid
 
 from util.field_of_view import fov
-from world.creatures._creature import Creature
+from world.creatures.creature import Creature
 from world.creatures.projectile import Projectile
 
 logger = logging.getLogger(__name__)

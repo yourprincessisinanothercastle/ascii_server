@@ -1,15 +1,21 @@
-from util.field_of_view import fov
-from world.creatures._creature import Creature
-from world.creatures.blob import Blob
-from world.creatures.player import Player
+from typing import List, NamedTuple
+from world.creatures import Creature, Blob, Player
 from world.level.map import Map
-import logging
 
+import logging
 logger = logging.getLogger(__name__)
 
-class Level():
+LevelBudget = NamedTuple("level_budget", [
+    ("monster_pool", List[Creature]),  # possible subset of monsters to draw from
+    ("entity_points", int),
+    ("tile_points", int)
+])
+
+
+class Level:
+    map: Map
+
     def __init__(self, map_generator):
-        self.map: Map = None
         self.players = []
         self.creatures = []
 

@@ -2,7 +2,7 @@ import logging
 import random
 from typing import TYPE_CHECKING
 
-from world.creatures._creature import Creature
+from world.creatures.creature import Creature
 
 logger = logging.getLogger(__name__)
 

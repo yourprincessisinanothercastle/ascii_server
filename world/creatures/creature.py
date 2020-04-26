@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import TYPE_CHECKING, Tuple, List
 
-from world.entity import Entity
+from world.entity import Entity, ENTITY_TYPE
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class Creature(Entity):
     )
 
     def __init__(self, x, y):
-        super().__init__(x, y)
+        super().__init__(x, y, ENTITY_TYPE.creature)
         self.room: Level = None
         self.x = 0
         self.y = 0

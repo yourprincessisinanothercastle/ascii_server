@@ -1,6 +1,6 @@
 import logging
 
-from world.creatures._creature import Creature
+from world.creatures.creature import Creature
 from world.creatures.explosion import Explosion
 
 logger = logging.getLogger(__name__)
