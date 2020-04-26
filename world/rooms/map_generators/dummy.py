@@ -44,7 +44,7 @@ class DummyGenerator(_MapGenerator):
             [(1, 1), (2, 2)]  # upper left
         ]
         self._monster_spawn_areas = [
-            [(3, 3), (4, 4)]  # bottom right
+            [(2, 2), (2, 5)]  # bottom right
         ]
 
     def make(self):

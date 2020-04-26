@@ -33,6 +33,8 @@ class Player(Creature):
         self.websocket = websocket
         self.color = random.randint(0, 255)
 
+        self.hit_points = 100
+
     def add_action(self, method, *args, **kwargs):
         action = (method, (args, kwargs))
         logger.debug(action)
@@ -70,7 +72,8 @@ class Player(Creature):
     def get_client_info(self):
         return {
             'coords': (self.x, self.y),
-            'color': self.color
+            'color': self.color,
+            'hit_points': self.hit_points
         }
 
     def get_client_init_data(self):

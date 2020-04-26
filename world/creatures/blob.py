@@ -12,7 +12,7 @@ class Blob(Creature):
     type = 'blob'
 
     ACTION_TIME = dict(
-        move=2.,
+        move=1.,
         hit=.20
     )
 
@@ -25,6 +25,8 @@ class Blob(Creature):
         self.color = 200
 
         self._visible_tile_coords = []  # temporary list to check if players are visible
+
+        self.damage = 5
 
     def _visit(self, x, y):
         '''
@@ -57,20 +59,36 @@ class Blob(Creature):
                     closest_player_distance = distance_player
         return closest_player
 
+    def hit(self):
+        for player in self.room.players:
+            if self.collides_with_entity(player):
+                player.hit_points -= self.damage
+                player.update_sent = False
+
     def update(self):
-        logger.info('updating blob')
-        closest_player: Player = self.get_closest_player()
-        if closest_player:
-            if closest_player.x < self.x:
-                dx = -1
-            elif closest_player.x > self.x:
-                dx = 1
-            else:
-                dx = 0
-            if closest_player.y < self.y:
-                dy = -1
-            elif closest_player.y > self.y:
-                dy = 1
-            else:
-                dy = 0
-            self.add_action(self.move, dx, dy, flush=True)
+        if not self.action_queue:
+            logger.info('updating blob')
+            closest_player: Player = self.get_closest_player()
+            logger.info('closest player: %s, %s' % (closest_player.x, closest_player.y))
+            logger.info('self: %s, %s' % (self.x, self.y))
+            if closest_player:
+                if self.collides_with_entity(closest_player):
+                    logger.info('hit!')
+                    self.add_action(self.hit)
+
+                else:
+                    if closest_player.x < self.x:
+                        dx = -1
+                    elif closest_player.x > self.x:
+                        dx = 1
+                    else:
+                        dx = 0
+
+                    if closest_player.y < self.y:
+                        dy = -1
+                    elif closest_player.y > self.y:
+                        dy = 1
+                    else:
+                        dy = 0
+
+                    self.add_action(self.move, dx, dy, flush=True)

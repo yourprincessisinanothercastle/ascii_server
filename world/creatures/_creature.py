@@ -60,6 +60,39 @@ class Creature(Entity):
     @property
     def current_tile(self):
         return self.room.map.tiles[self.y][self.x]
+    
+    def collides_with_coords(self, x, y):
+        """
+        test own hitbox against collision on x, y
+        
+        :param x: 
+        :param y: 
+        :return: 
+        """ 
+        for row_idx, row in enumerate(self.HITBOX):
+            for col_idx, col in enumerate(row):
+                if col:
+                    hitbox_tile_coords = self.x + col_idx, self.y + row_idx
+                    if hitbox_tile_coords == (x, y):
+                        return True
+        return False
+
+    def collides_with_entity(self, entity):
+        """
+        test own hitbox agains another entities hitbox
+        
+        :param entity: 
+        :return: 
+        """
+        for row_idx, row in enumerate(entity.HITBOX):
+            for col_idx, col in enumerate(row):
+                if col:
+                    hitbox_tile_coords = entity.x + col_idx, entity.y + row_idx
+                    collides = self.collides_with_coords(*hitbox_tile_coords)
+                    if collides:
+                        return True
+        return False
+        
 
     def move(self, dx, dy):
         collision = False
@@ -84,13 +117,10 @@ class Creature(Entity):
     def get_client_info(self):
         is_visible = self.is_visible()
         if is_visible:
-            logger.info('visible')
             coords = (self.x, self.y)
         elif self.last_seen_at:
-            logger.info('last seen')
             coords = self.last_seen_at
         else:
-            logger.info('not seen')
             return False
 
         return {
@@ -113,7 +143,6 @@ class Creature(Entity):
 
             # add time delta to current_action_time
             self.current_action_time += time_delta
-            logger.debug('current action time: %s' % self.current_action_time)
 
             if self.current_action_time >= action_time:
                 # unpack current_action
@@ -138,7 +167,6 @@ class Creature(Entity):
 
     def add_action(self, method, *args, flush=False, **kwargs):
         action = (method, (args, kwargs))
-        logger.debug(action)
         if flush:
             self.action_queue = []
         self.action_queue.append(action)
