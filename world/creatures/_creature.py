@@ -136,9 +136,11 @@ class Creature(Entity):
                 self.current_action = self.action_queue.pop(0)
                 self.current_action_time = 0
 
-    def add_action(self, method, *args, **kwargs):
+    def add_action(self, method, *args, flush=False, **kwargs):
         action = (method, (args, kwargs))
         logger.debug(action)
+        if flush:
+            self.action_queue = []
         self.action_queue.append(action)
         self.action_queue = self.action_queue[:3]
 

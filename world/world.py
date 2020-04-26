@@ -39,4 +39,5 @@ class World:
         for room in self.rooms:
             room.update_field_of_view()
             for creature in room.creatures:
+                creature.update()
                 creature.process_action_queue(dt)
