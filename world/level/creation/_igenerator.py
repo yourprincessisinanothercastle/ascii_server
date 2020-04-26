@@ -6,6 +6,7 @@ from world.entity import Entity
 import logging
 logger = logging.getLogger(__name__)
 
+
 # structure used for tile-based generators (level & area generators)
 GeneratorOutput = NamedTuple("area_generator_result", [
     ("entities", List[Entity]),
