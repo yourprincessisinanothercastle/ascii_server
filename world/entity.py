@@ -10,20 +10,24 @@ ENTITY_TYPE = Enum('ENTITY_TYPE', 'creature item interact exit')
 
 class Entity:
     """
-    something that has coords on a map tile
+    something in a level that has coords on a map tile
     """
+    floor: 'Level'
+    x: int
+    y: int
+
     HITBOX = [
         [None, None, None],
         ['X', 'X', 'X'],
         ['X', 'X', 'X'],
     ]
-    floor: 'Level'
 
-    def __init__(self, x, y, entity_type: ENTITY_TYPE):
+    def __init__(self, x: int, y: int, entity_type: ENTITY_TYPE):
         self.entity_type: ENTITY_TYPE = entity_type
+        self.floor = None
         self.x = x
         self.y = y
 
-    def set_coords(self, x, y):
+    def set_coords(self, x: int, y: int):
         self.x = x
         self.y = y

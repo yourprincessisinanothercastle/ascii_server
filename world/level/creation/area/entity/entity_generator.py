@@ -1,9 +1,6 @@
 from typing import List, NamedTuple
-from world.entity import Entity
-from world.creatures import Creature
 from world.level.creation import IGenerator
-
-from world.creatures import BESTIARY
+from world.creatures import Bestiary, Creature
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,9 +19,11 @@ class EntityGenerator(IGenerator):
     def generate(self,
                  entity_budget: EntityBudget,
                  tiles: List[List[str]],
-                 player_spawn_count: int = 0,
-                 has_exit: bool = False) -> List[Entity]:
+                 player_spawn_area_count: int = 1,
+                 has_exit: bool = False) -> List[Creature]:
 
+        # TODO implement real generation
+        i = 2
         return [
-            BESTIARY.blob(4, 4)
+            creature(x=++i, y=i) for creature in Bestiary.get_creature_pool()
         ]

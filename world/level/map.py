@@ -13,8 +13,8 @@ TILE_SIZE = 3
 class Map:
     def __init__(self, generator_class: Type[IGenerator] = None):
         # todo: connections between levels
-        map_generator: IGenerator = generator_class()
-        self._map: GeneratorOutput = map_generator.generate()
+        self._map_generator: IGenerator = generator_class()
+        self._map: GeneratorOutput = self._map_generator.generate()
         self.entities: List[Entity] = self._map.entities
         self.tiles: dict = self._tiles_from_map_json()
 
@@ -104,6 +104,7 @@ class Map:
         return self._random_coords(*random_spawn_area)
 
     def draw(self):
+        # TODO is this function redundant now that a generator can draw the current map?
         result = []
         for row in self.tiles:
             result_row = [tile.char for tile in row]

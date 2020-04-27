@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 class Blob(Creature):
     type = 'blob'
 
-    def __init__(self):
-        super().__init__(0, 0)
+    def __init__(self, x: int = 0, y: int = 0):
+        super().__init__(x, y)
         self.direction = Creature.DIRECTIONS['left']
 
         self.view_radius = 0

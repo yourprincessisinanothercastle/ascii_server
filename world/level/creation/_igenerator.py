@@ -27,6 +27,7 @@ class IGenerator(ABC):
     def __init__(self):
         self._tiles: List[List[str]] = []
         self._entities: List[Entity] = []
+        self._player_spawn_areas: List[Tuple[int, int]] = []
 
     def draw(self):
         """ preview output """
@@ -39,7 +40,9 @@ class IGenerator(ABC):
             print(''.join(drawn_row))
 
     def as_json(self):
-        return json.dumps(GeneratorOutput(entities=self._entities, tiles=self._tiles))
+        return json.dumps(GeneratorOutput(entities=self._entities,
+                                          tiles=self._tiles,
+                                          player_spawn_areas=self._player_spawn_areas))
 
     @abstractmethod
     def generate(self) -> GeneratorOutput:

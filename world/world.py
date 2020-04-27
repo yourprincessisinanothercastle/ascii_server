@@ -1,5 +1,5 @@
 from typing import List
-from world.level.creation.area import SquareRoom
+from world.level.creation import LevelGenerator
 from world.level.level import Level
 
 import logging
@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class World:
+
     def __init__(self):
         self.players = []
         self.levels: List[Level] = []
@@ -17,7 +18,7 @@ class World:
         self.init_world()
 
     def init_world(self):
-        self.start_level = Level(SquareRoom)  # TODO fix to use the level_generator
+        self.start_level = Level(LevelGenerator)  # TODO fix to use the level_generator
         self.start_level.init()
         self.levels.append(self.start_level)
 

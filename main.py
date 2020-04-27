@@ -139,8 +139,9 @@ def run():
 @cli.command()
 @click.argument('generator_name')
 def gen_map(generator_name):
-    generator = area_generators[generator_name]
-    generator().draw()
+    generator = area_generators[generator_name]()
+    generator.generate()
+    generator.draw()
 
 
 cli()
