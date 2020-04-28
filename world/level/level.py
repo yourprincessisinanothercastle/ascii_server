@@ -10,12 +10,12 @@ logger = logging.getLogger(__name__)
 class Level:
     map: Map
 
-    def __init__(self, map_generator):
+    def __init__(self, level_generator):
         self.players = []
         self.creatures = []
         self.entities = []
 
-        self.map_generator = map_generator
+        self.level_generator = level_generator
         
         self.field_of_view_needs_update = True
 
@@ -45,7 +45,7 @@ class Level:
             self.field_of_view_needs_update = False
 
     def init(self):
-        self.map = Map(self.map_generator)
+        self.map = Map(self.level_generator)
         for entity in self.map.entities:
             # todo: base on data from generator
             self.spawn_entity(entity)

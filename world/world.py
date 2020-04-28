@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 class World:
 
     def __init__(self):
+        self.difficulty = 1
         self.players = []
         self.levels: List[Level] = []
         self.start_level: Level = None
@@ -18,7 +19,9 @@ class World:
         self.init_world()
 
     def init_world(self):
-        self.start_level = Level(LevelGenerator)  # TODO fix to use the level_generator
+        # TODO add func to progress the world with next level (generated lvl exits gets and incremented lvl_nr maybe)
+        level_generator = LevelGenerator(len(self.levels) + 1, self.difficulty)
+        self.start_level = Level(level_generator)
         self.start_level.init()
         self.levels.append(self.start_level)
 

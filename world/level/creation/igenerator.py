@@ -7,11 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 # structure used for all generators - not all fields are populated by each generator
-GeneratorOutput = NamedTuple("area_generator_result", [
+GeneratorOutput = NamedTuple("generator_output", [
     ("entities", List[Entity]),
     ("tiles", List[List[str]]),
     ("player_spawn_areas", List[Tuple[int, int]])
 ])
+
 
 class IGenerator(ABC):
     """

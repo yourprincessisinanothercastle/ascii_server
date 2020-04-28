@@ -19,15 +19,28 @@ class LevelGenerator(IGenerator):
     Macro scale generator. Draws the path and distributes budget across area generators
     to populate a level with content.
     """
+    difficulty: int
+    level_nr: int
     level_budget: LevelBudget
     path: PathGenerator
 
-    # noinspection PyMethodOverriding
-    def generate(self, level_nr: int = 1, difficulty: int = 1) -> GeneratorOutput:
-        self._set_budget(level_nr, difficulty)
-        self._set_path(level_nr)
+    def __init__(self, level_nr: int = 1, difficulty: int = 1):
+        super().__init__()
+        self.level_nr = level_nr
+        self.difficulty = difficulty
 
-        return self.path.generate(self.level_budget)
+    def generate(self) -> GeneratorOutput:
+        self._set_budget(self.level_nr, self.difficulty)
+        self._set_path(self.level_nr)
+
+        path_output = self.path.generate(self.level_budget)
+        # setting these vars so that its easy to draw/as_json directly from LevelGenerator
+        self._tiles = path_output.tiles
+        self._entities = path_output.entities
+        self._player_spawn_areas = path_output.player_spawn_areas
+
+        # final generated result
+        return path_output
 
     def _set_path(self, level_nr: int):
         # TODO make choosing a generator a random choice "depending on ..."

@@ -2,7 +2,7 @@ import random
 from typing import Type, List
 from world.entity import Entity
 from world.level.tile import TILE_MAP, Tile
-from world.level.creation import IGenerator, GeneratorOutput
+from world.level.creation import IGenerator, GeneratorOutput, LevelGenerator
 
 import logging
 logger = logging.getLogger(__name__)
@@ -11,10 +11,10 @@ TILE_SIZE = 3
 
 
 class Map:
-    def __init__(self, generator_class: Type[IGenerator] = None):
+    def __init__(self, level_generator: LevelGenerator = None):
         # todo: connections between levels
-        self._map_generator: IGenerator = generator_class()
-        self._map: GeneratorOutput = self._map_generator.generate()
+        self._level_generator: LevelGenerator = level_generator
+        self._map: GeneratorOutput = self._level_generator.generate()
         self.entities: List[Entity] = self._map.entities
         self.tiles: dict = self._tiles_from_map_json()
 
