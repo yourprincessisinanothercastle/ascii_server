@@ -16,7 +16,7 @@ class Player(Creature):
         ['X', 'X', 'X'],
         ['X', 'X', 'X'],
     ]
-    
+
     BASE = (1, 2)
 
     FOV_OFFSET = (1, 1)
@@ -37,14 +37,53 @@ class Player(Creature):
 
         self.hit_points = 100
 
-    def add_action(self, method, *args, **kwargs):
-        action = (method, (args, kwargs))
-        logger.debug(action)
-        self.action_queue.append(action)
-        self.action_queue = self.action_queue[:3]
+        self.keys_pressed = set()
 
     def update_fov(self):
         fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.room.map.update_visible)
+
+    def get_next_action(self):
+        if 'up' in self.keys_pressed:
+            return self.move, 0, -1
+        elif 'down' in self.keys_pressed:
+            return self.move, 0, 1
+        elif 'left' in self.keys_pressed:
+            return self.move, -1, 0
+        elif 'right' in self.keys_pressed:
+            return self.move, 1, 0
+
+    def process_action_queue(self, time_delta: float):
+        """
+        progress current action further, or poll for new action
+        """
+
+        if self.current_action:
+            # get action time from dict
+            action_time = self.ACTION_TIME[self.current_action[0].__name__]
+
+            # add time delta to current_action_time
+            self.current_action_time += time_delta
+
+            if self.current_action_time >= action_time:
+                # unpack current_action
+                action, (args, kwargs) = self.current_action
+
+                # execute
+                action(*args, **kwargs)
+
+                if self.action_queue:
+                    # get the next action
+                    self.current_action = self.get_next_action()
+
+                    # set current_action_time to whats left of the last time slot
+                    self.current_action_time = self.current_action_time % action_time
+                else:
+                    self.current_action = None
+
+        else:
+            if self.action_queue:
+                self.current_action = self.get_next_action()
+                self.current_action_time = 0
 
     def move(self, dx, dy):
         collision = False
@@ -115,14 +154,8 @@ class Player(Creature):
         return update_package
 
     def update(self, actions):
-        for action in actions:
-            if action == 'up':
-                self.add_action(self.move, 0, -1)
-            elif action == 'down':
-                self.add_action(self.move, 0, 1)
-            elif action == 'left':
-                self.add_action(self.move, -1, 0)
-            elif action == 'right':
-                self.add_action(self.move, 1, 0)
+        for key, state in actions:
+            if state == 'release':
+                self.keys_pressed.remove(key)
             else:
-                logger.warning('unknown action %s' % action)
+                self.keys_pressed.add(key)
