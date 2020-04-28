@@ -1,4 +1,4 @@
-from world.level.creation.area._area_generator import AreaGenerator
+from world.level.creation.area import AreaGenerator
 
 import logging
 logger = logging.getLogger(__name__)
