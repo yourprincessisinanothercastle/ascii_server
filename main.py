@@ -1,5 +1,4 @@
 import json
-from collections import namedtuple
 
 import click
 import asyncio
@@ -8,7 +7,7 @@ from pip._internal.utils import logging
 
 from init_logging import init_logging
 from world.creatures.player import Player
-from world.rooms.map_generators import generators
+from world.level.creation.area import AREA_GENERATORS
 from world.world import World
 
 init_logging('debug')
@@ -100,7 +99,7 @@ async def game_loop(app):
         if not app["players"]:
             break
 
-        for room in app['world'].rooms:
+        for room in app['world'].levels:
             room.map.set_tile_update_sent()
 
         await asyncio.sleep(TICK_TIME)
@@ -140,8 +139,9 @@ def run():
 @cli.command()
 @click.argument('generator_name')
 def gen_map(generator_name):
-    generator = generators[generator_name]
-    generator().draw()
+    generator = AREA_GENERATORS[generator_name]()
+    generator.generate()
+    generator.draw()
 
 
 cli()

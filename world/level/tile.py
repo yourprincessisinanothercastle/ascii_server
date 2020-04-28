@@ -1,5 +1,5 @@
-class Tile: 
-    name = ''
+class Tile:
+    name = None
     blocked = False
     block_sight = False
 

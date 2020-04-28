@@ -1,14 +1,10 @@
 import logging
 import uuid
-from typing import TYPE_CHECKING, Tuple, List
+from typing import Tuple, List
 
-from world.entity import Entity
+from world.entity import Entity, ENTITY_TYPE
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from world.rooms.room import Room
-
 
 class Creature(Entity):
     '''
@@ -22,22 +18,13 @@ class Creature(Entity):
         right='right',
     )
 
-    HITBOX = [
-        [None, None, None],
-        ['X', 'X', 'X'],
-        ['X', 'X', 'X'],
-    ]
-
     ACTION_TIME = dict(
         move=.10,
         hit=.20
     )
 
     def __init__(self, x, y):
-        super().__init__(x, y)
-        self.room: Room = None
-        self.x = 0
-        self.y = 0
+        super().__init__(x, y, ENTITY_TYPE.creature)
 
         self.action_queue: List[Tuple] = []
 
@@ -51,7 +38,7 @@ class Creature(Entity):
         for row_idx, row in enumerate(self.HITBOX):
             for col_idx, col in enumerate(row):
                 if col:
-                    target_tile = self.room.map.get_tile(self.y + row_idx, self.x + col_idx)
+                    target_tile = self.floor.map.get_tile(self.y + row_idx, self.x + col_idx)
                     if target_tile.is_visible:
                         self.last_seen_at = (self.x, self.y)
                         return True
@@ -59,14 +46,14 @@ class Creature(Entity):
 
     @property
     def current_tile(self):
-        return self.room.map.tiles[self.y][self.x]
+        return self.floor.map.tiles[self.y][self.x]
 
     def move(self, dx, dy):
         collision = False
         for row_idx, row in enumerate(self.HITBOX):
             for col_idx, col in enumerate(row):
                 if col:  # dont collide on Nones
-                    target_tile = self.room.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
+                    target_tile = self.floor.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
                     if target_tile.blocked:
                         collision = True
                         break
@@ -75,7 +62,7 @@ class Creature(Entity):
 
         if not collision:
             logger.info('setting fov update')
-            self.room.field_of_view_needs_update = True
+            self.floor.field_of_view_needs_update = True
             self.update_sent = False
 
             self.x += dx
@@ -142,6 +129,3 @@ class Creature(Entity):
         self.action_queue.append(action)
         self.action_queue = self.action_queue[:3]
 
-    def set_coords(self, x, y):
-        self.x = x
-        self.y = y
