@@ -1,5 +1,4 @@
 import json
-from collections import namedtuple
 
 import click
 import asyncio
@@ -8,7 +7,7 @@ from pip._internal.utils import logging
 
 from init_logging import init_logging
 from world.creatures.player import Player
-from world.rooms.map_generators import generators
+from world.level.creation.area import AREA_GENERATORS
 from world.world import World
 
 init_logging('debug')
@@ -19,6 +18,13 @@ logger = logging.getLogger(__name__)
 async def handle(request):
     return web.Response(body='nothing', content_type='text/html')
 
+
+async def remove_player(app, player):
+    app['world'].remove_player(player)
+    await player.websocket.close()
+    app['players'].remove(player)
+    app['removed_players'].append(player)
+    print('%s disconnected' % player)
 
 async def wshandler(request):
     app = request.app
@@ -61,11 +67,7 @@ async def wshandler(request):
         logger.error(e, exc_info=True)
 
     finally:
-        app['world'].remove_player(player)
-        await player.websocket.close()
-        app['players'].remove(player)
-        app['removed_players'].append(player)
-        print('%s disconnected' % player)
+        await remove_player(app, player)
 
     return ws
 
@@ -83,7 +85,11 @@ async def game_loop(app):
                 logger.error("exception: %s" % ex)
             update_data = player.get_client_update_data()
             if update_data:
-                await player.websocket.send_str(json.dumps({'type': 'update', 'data': update_data}))
+                try:
+                    await player.websocket.send_str(json.dumps({'type': 'update', 'data': update_data}))
+                except Exception as e:
+                    logger.error(e)
+                    await remove_player(app, player)
 
         for player in app["players"]:
             player.update_sent = True
@@ -91,16 +97,21 @@ async def game_loop(app):
         if app['removed_players']:
             logger.info('sending remove_player for %s' % app['removed_players'])
             for player in app['players']:
-                await player.websocket.send_str(
-                    json.dumps(
-                        {'type': 'remove_players',
-                         'data': [str(left_player.uid) for left_player in app['removed_players']]}))
+                try:
+                    await player.websocket.send_str(
+                        json.dumps(
+                            {'type': 'remove_players',
+                             'data': [str(left_player.uid) for left_player in app['removed_players']]}))
+                except Exception as e:
+                    logger.error(e)
+                    await remove_player(app, player)
+
             app['removed_players'] = []
 
         if not app["players"]:
             break
 
-        for room in app['world'].rooms:
+        for room in app['world'].levels:
             room.map.set_tile_update_sent()
 
         await asyncio.sleep(TICK_TIME)
@@ -140,8 +151,9 @@ def run():
 @cli.command()
 @click.argument('generator_name')
 def gen_map(generator_name):
-    generator = generators[generator_name]
-    generator().draw()
+    generator = AREA_GENERATORS[generator_name]()
+    generator.generate()
+    generator.draw()
 
 
 cli()

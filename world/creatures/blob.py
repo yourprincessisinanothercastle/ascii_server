@@ -2,7 +2,7 @@ import logging
 
 from util.coord_helpers import distance
 from util.field_of_view import fov
-from world.creatures._creature import Creature
+from world.creatures.creature import Creature
 from world.creatures.player import Player
 
 logger = logging.getLogger(__name__)
@@ -10,14 +10,14 @@ logger = logging.getLogger(__name__)
 
 class Blob(Creature):
     type = 'blob'
-
     ACTION_TIME = dict(
         move=1.,
         hit=.20
     )
 
-    def __init__(self):
-        super().__init__(0, 0)
+    def __init__(self, x: int = 0, y: int = 0):
+        super().__init__(x, y)
+
         self.direction = Creature.DIRECTIONS['left']
 
         self.view_radius = 10
@@ -35,11 +35,11 @@ class Blob(Creature):
         '''
 
         self._visible_tile_coords.append((x, y))
-        if y > len(self.room.map.tiles) - 1 or y < 0:
+        if y > len(self.floor.map.tiles) - 1 or y < 0:
             return True
-        if x > len(self.room.map.tiles[y]) - 1 or x < 0:
+        if x > len(self.floor.map.tiles[y]) - 1 or x < 0:
             return True
-        return self.room.map.tiles[y][x].block_sight
+        return self.floor.map.tiles[y][x].block_sight
 
     def get_closest_player(self):
         closest_player = None
@@ -50,7 +50,7 @@ class Blob(Creature):
         fov(self.x, self.y, self.view_radius, self._visit)
 
         # get players on visible tiles
-        for player in self.room.players:
+        for player in self.floor.players:
             if (player.x, player.y) in self._visible_tile_coords:
                 distance_player = distance(self.x, self.y, player.x, player.y)
                 if not closest_player_distance or \
@@ -60,7 +60,7 @@ class Blob(Creature):
         return closest_player
 
     def hit(self):
-        for player in self.room.players:
+        for player in self.floor.players:
             if self.collides_with_entity(player):
                 player.hit_points -= self.damage
                 player.update_sent = False
