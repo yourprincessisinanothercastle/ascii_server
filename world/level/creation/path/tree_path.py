@@ -1,4 +1,4 @@
-from world.level.creation import GeneratorOutput, LevelBudget
+from world.level.creation import LevelBudget, GeneratorOutput
 from world.level.creation.path._path_generator import PathGenerator
 
 import logging

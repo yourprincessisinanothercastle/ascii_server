@@ -1,23 +1,13 @@
 import math
 import random
-from typing import Type, List, Tuple, NamedTuple
+from typing import Type, List, Tuple
 from world.creatures import Creature, Blob
-from world.level.creation import IGenerator, GeneratorOutput
+from world.level.creation import IGenerator, GeneratorOutput, LevelBudget
 from world.level.creation.area import SquareRoom, AreaGenerator
-
-import logging
-
 from world.level.creation.path import PathGenerator, PATH_GENERATORS
 
+import logging
 logger = logging.getLogger(__name__)
-
-LevelBudget = NamedTuple("level_budget", [
-    ("monster_pool", List[Type[Creature]]),  # subset of possible monsters for this level
-    ("entity_points", int),
-    ("area_pool", List[Type[AreaGenerator]]),  # subset of possible areas for this level
-    ("tile_points", int)  # 1 point -> 1 Tile
-    # TODO might expand this with more rolled properties - things like "has_secret" etc
-])
 
 # base value to relate between entity and tile budgets - to avoid tweaks to out-scale one from the other
 # control this value to scale game up or down, like a master volume =)
@@ -41,7 +31,7 @@ class LevelGenerator(IGenerator):
 
     def _set_path(self, level_nr: int):
         # TODO make choosing a generator a random choice "depending on ..."
-        self.path = PATH_GENERATORS.tree_path()
+        self.path = PATH_GENERATORS["tree_path"]()
 
     def _set_budget(self, level_nr: int, difficulty: int):
         """ takes the total budget and splits it up for the level sub-generators (area, path, entity) """
@@ -78,5 +68,5 @@ class LevelGenerator(IGenerator):
         soft_bound = GLOBAL_VALUE_INDEX * 4  # sets the tone of increase early on, slowing down significantly after a few levels
         hard_cap = GLOBAL_VALUE_INDEX * 6
         progression = soft_bound - (soft_bound / (level_nr + 1) * 1.2) + level_nr  # flat progression
-        progression *= random.uniform(random_offset)  # should result in +/- areas generated compared to static formula
+        progression *= random.uniform(*random_offset)  # should result in +/- areas generated compared to static formula
         return math.ceil(progression) if progression < hard_cap else hard_cap

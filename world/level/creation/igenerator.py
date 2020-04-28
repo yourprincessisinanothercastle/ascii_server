@@ -1,25 +1,17 @@
 import json
-from typing import List, NamedTuple, Tuple
+from typing import List, Tuple, NamedTuple
 from abc import ABC, abstractmethod
 from world.entity import Entity
 
 import logging
 logger = logging.getLogger(__name__)
 
-
-# structure used for tile-based generators (level & area generators)
+# structure used for all generators - not all fields are populated by each generator
 GeneratorOutput = NamedTuple("area_generator_result", [
     ("entities", List[Entity]),
     ("tiles", List[List[str]]),
     ("player_spawn_areas", List[Tuple[int, int]])
 ])
-
-tile_abbreviation_definitions = {
-    "W": "wall",
-    ".": "floor",
-    "_": None
-}
-
 
 class IGenerator(ABC):
     """

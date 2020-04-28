@@ -1,5 +1,6 @@
-from world.level.creation import IGenerator, GeneratorOutput, LevelBudget
+from world.level.creation import IGenerator, GeneratorOutput
 from world.level.creation.area import SquareRoom
+from world.level.creation import LevelBudget
 
 
 class PathGenerator(IGenerator):
