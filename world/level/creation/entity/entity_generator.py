@@ -27,3 +27,7 @@ class EntityGenerator(IGenerator):
         return [
             creature(x=++i, y=i) for creature in Bestiary.get_creature_pool()
         ]
+
+    def draw(self):
+        # Could output entities in a more readable fashion than as_json if we want, at some point
+        raise NotImplementedError

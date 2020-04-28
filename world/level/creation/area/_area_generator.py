@@ -21,7 +21,8 @@ class AreaGenerator(IGenerator):
     _player_spawn_areas: List[Tuple[Tuple[int, int], Tuple[int, int]]]
 
     # noinspection PyMethodOverriding
-    def generate(self, tile_budget: TileBudget = TileBudget(0), entity_budget: EntityBudget = EntityBudget([], 0),
+    def generate(self, tile_budget: TileBudget = TileBudget(tile_points=0),
+                 entity_budget: EntityBudget = EntityBudget([], 0),
                  player_spawn_area_count: int = 1, has_exit: bool = False) -> GeneratorOutput:
         """ Starts generating an area subset of a level """
 
@@ -44,7 +45,7 @@ class AreaGenerator(IGenerator):
                            has_exit: bool) -> List[Entity]:
         return EntityGenerator().generate(entity_budget, tiles, has_exit)
 
-    # implement in subclass
+    # implement in subclass - this is a test output
     def _generate_tiles(self, tile_budget) -> List[List[str]]:
         W = 'wall'
         F = 'floor'
