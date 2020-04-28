@@ -3,6 +3,7 @@ from world.level.creation import LevelGenerator
 from world.level.level import Level
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,10 +29,10 @@ class World:
     def add_player(self, player):
         self.players.append(player)
         self.start_level.spawn_player(player)
-        
+
     def remove_player(self, player):
         if player.floor:
-            player.floor.remove_entity(player)
+            player.floor.remove_player(player)
         self.players.remove(player)
 
     def tick(self, dt):
@@ -40,5 +41,7 @@ class World:
 
         for level in self.levels:
             level.update_field_of_view()
-            for creature in level.creatures:
+            logger.info('ticking entities in %s: %s ' % (level, level.entities))
+            for creature in level.entities:
+                creature.update()
                 creature.process_action_queue(dt)

@@ -12,7 +12,6 @@ class Level:
 
     def __init__(self, level_generator):
         self.players = []
-        self.creatures = []
         self.entities = []
 
         self.level_generator = level_generator
@@ -48,6 +47,7 @@ class Level:
         self.map = Map(self.level_generator)
         for entity in self.map.entities:
             # todo: base on data from generator
+            logger.info('adding %s at %s, %s' % (entity, entity.x, entity.y))
             self.spawn_entity(entity)
 
     def remove_entity(self, entity: Entity):
@@ -72,3 +72,8 @@ class Level:
         self.players.append(player)
         x, y = self.map.get_player_spawn()
         player.set_coords(x, y)
+    
+    def remove_player(self, player: Entity):
+        logger.info('removing player %s from level: %s' % (player, self))
+        self.players.remove(player)
+        player.floor = None

@@ -16,6 +16,8 @@ class Player(Creature):
         ['X', 'X', 'X'],
         ['X', 'X', 'X'],
     ]
+    
+    BASE = (1, 2)
 
     FOV_OFFSET = (1, 1)
 
@@ -28,10 +30,12 @@ class Player(Creature):
         super().__init__(0, 0)
         self.direction = Creature.DIRECTIONS['left']
 
-        self.view_radius = 10
+        self.view_radius = 20
 
         self.websocket = websocket
         self.color = random.randint(0, 255)
+
+        self.hit_points = 100
 
     def add_action(self, method, *args, **kwargs):
         action = (method, (args, kwargs))
@@ -70,7 +74,9 @@ class Player(Creature):
     def get_client_info(self):
         return {
             'coords': (self.x, self.y),
-            'color': self.color
+            'color': self.color,
+            'hit_points': self.hit_points,
+            'sprite_state': self.get_sprite_state()
         }
 
     def get_client_init_data(self):
@@ -79,7 +85,7 @@ class Player(Creature):
             'map': self.floor.map.serialize_init_state(),
             'players': {str(player.uid): player.get_client_info() for player in self.floor.players if
                         player is not self},
-            'creatures': {str(creature.uid): creature.get_client_info() for creature in self.floor.creatures if
+            'creatures': {str(creature.uid): creature.get_client_info() for creature in self.floor.entities if
                           creature.get_client_info()}
         }
 
@@ -99,7 +105,7 @@ class Player(Creature):
         if players_update:
             update_package['players'] = players_update
 
-        creatures_update = {str(creature.uid): creature.get_client_info() for creature in self.floor.creatures if
+        creatures_update = {str(creature.uid): creature.get_client_info() for creature in self.floor.entities if
                             creature.get_client_info()
                             and creature.update_sent is False}
 
