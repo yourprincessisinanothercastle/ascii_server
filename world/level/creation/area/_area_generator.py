@@ -1,7 +1,7 @@
 from typing import List, Tuple, NamedTuple
 from world.entity import Entity
 from world.level.creation import IGenerator, GeneratorOutput
-from world.level.creation.area.entity import EntityBudget, EntityGenerator
+from world.level.creation.entity import EntityBudget, EntityGenerator
 
 import logging
 logger = logging.getLogger(__name__)

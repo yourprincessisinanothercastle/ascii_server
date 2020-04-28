@@ -20,6 +20,7 @@ tile_abbreviation_definitions = {
     "_": None
 }
 
+
 class IGenerator(ABC):
     """
     common functionality shared between tile-based generators
