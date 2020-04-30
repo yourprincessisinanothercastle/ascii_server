@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 EntityBudget = NamedTuple("entity_budget", [
     ("monster_pool", List[Creature]),  # possible subset (less than level subset) of monsters to draw from
-    ("entity_points", int)
+    ("entity_points", int),
+    ("has_exit", bool)
 ])
 
 
@@ -18,9 +19,7 @@ class EntityGenerator(IGenerator):
     # noinspection PyMethodOverriding
     def generate(self,
                  entity_budget: EntityBudget,
-                 tiles: List[List[str]],
-                 player_spawn_area_count: int = 1,
-                 has_exit: bool = False) -> List[Creature]:
+                 tiles: List[List[str]]) -> List[Creature]:
 
         # TODO implement real generation
         i = 2
