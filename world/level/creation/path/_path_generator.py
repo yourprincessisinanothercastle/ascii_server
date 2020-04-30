@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Type, List
+from typing import Type, List, Tuple
 
 from world.level.creation import IGenerator, GeneratorOutput
 from world.level.creation.area import AreaGenerator, AreaBudget
@@ -10,7 +10,7 @@ from world.level.creation.entity import EntityBudget
 import logging
 logger = logging.getLogger(__name__)
 
-EMPTY_TILE: str = None
+EMPTY_TILE = "-"
 
 
 class PathGenerator(IGenerator):
@@ -43,6 +43,10 @@ class PathGenerator(IGenerator):
             for n2 in range(0, dim):
                 col.append(EMPTY_TILE)
         return empty_map
+
+    def _get_first_room_topleft(self, area_points: int, width, height) -> Tuple[int, int]:
+        offset = math.sqrt(area_points) / 2
+        return width / 2 - offset, height / 2 - offset
 
     def _get_entity_points(self, area_points: List[int]):
         # TODO not yet sure what im balancing points against, so just simply the same as area atm

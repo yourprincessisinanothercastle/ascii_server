@@ -72,7 +72,8 @@ class LevelGenerator(IGenerator):
 
     def assemble_area_pool(self, level_nr: int) -> Tuple[List[Type[AreaGenerator]], List[int]]:
         # TODO devise some form of picking hierarchy for areas tied to levels?
-        return [SquareRoom], [1]
+        # TODO right now each picked area is weighed equally, make something up to change it =)
+        return [SquareRoom], [1]  # pool and matching weights
 
     def tile_point_formula(self, level_nr: int, random_offset: Tuple[float, float] = (0.9, 1.1)) -> int:
         """

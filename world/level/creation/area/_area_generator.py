@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 AreaBudget = NamedTuple("area_budget", [
-    ("doorways", List[Type[Tuple[int, int]]]),  # coordinate tuples for connecting doors
+    ("doorways", List[Tuple[int, int]]),  # coordinate tuples for connecting areas
     ("tile_points", int)  # like for level_budget, tile_points do NOT equal actual tiles generated
 ])
 
