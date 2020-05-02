@@ -3,7 +3,7 @@ from typing import NamedTuple, Type, List
 from world.creatures import Creature
 from world.level.creation.area import AreaGenerator
 
-# set this struct aside to avoid circular import issues
+# Note: I set this struct aside to avoid circular import issues
 LevelBudget = NamedTuple("level_budget", [
     ("monster_pool", List[Type[Creature]]),  # subset of possible monsters for this level
     ("entity_points", int),
@@ -11,6 +11,6 @@ LevelBudget = NamedTuple("level_budget", [
     ("area_weight", List[int]),  # should match indices with area_pool to allocate which areas should occur more often
     ("tile_points", int)
     # 1 point should NOT mean 1 tile - its a scale to calculate progression increases from
-    # a "narrow map" may produce fewer tiles, while an open-area map produces more, from the same overall points
+    # Ex: a "narrow map" may produce fewer tiles, while an open-area map produces more, from the same overall points
     # TODO might expand this with more rolled properties - things like "has_secret" etc
 ])

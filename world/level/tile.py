@@ -1,3 +1,5 @@
+TILE_NAMES = dict(floor="floor", wall="wall")
+
 class Tile:
     name = None
     blocked = False
@@ -18,13 +20,13 @@ class Tile:
         
         
 class Wall(Tile):
-    name = 'wall'
+    name = TILE_NAMES["floor"]
     blocked = True
     block_sight = True
 
 
 class Floor(Tile):
-    name = 'floor'
+    name = TILE_NAMES["wall"]
     blocked = False
     block_sight = False
 
