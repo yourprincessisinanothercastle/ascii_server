@@ -25,7 +25,7 @@ class EntityGenerator(IGenerator):
         # TODO implement real generation
         i = 2
         return [
-            creature(x=3, y=2) for creature in Bestiary.get_creature_pool()
+            #creature(x=5, y=5) for creature in Bestiary.get_creature_pool()
         ]
 
     def draw(self):

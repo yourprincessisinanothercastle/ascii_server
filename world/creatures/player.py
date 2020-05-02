@@ -44,13 +44,13 @@ class Player(Creature):
 
     def get_next_action(self):
         if 'up' in self.keys_pressed:
-            return self.move, 0, -1
+            return self.move, ((0, -1), {})
         elif 'down' in self.keys_pressed:
-            return self.move, 0, 1
+            return self.move, ((0, 1), {})
         elif 'left' in self.keys_pressed:
-            return self.move, -1, 0
+            return self.move, ((-1, 0), {})
         elif 'right' in self.keys_pressed:
-            return self.move, 1, 0
+            return self.move, ((1, 0), {})
 
     def process_action_queue(self, time_delta: float):
         """
@@ -71,9 +71,11 @@ class Player(Creature):
                 # execute
                 action(*args, **kwargs)
 
-                if self.action_queue:
+                next_action = self.get_next_action()
+                if next_action:
                     # get the next action
-                    self.current_action = self.get_next_action()
+                    self.current_action = next_action
+                    print('current action: %s %s' % (self.current_action))
 
                     # set current_action_time to whats left of the last time slot
                     self.current_action_time = self.current_action_time % action_time
@@ -81,8 +83,10 @@ class Player(Creature):
                     self.current_action = None
 
         else:
-            if self.action_queue:
-                self.current_action = self.get_next_action()
+            next_action = self.get_next_action()
+            if next_action:
+                # get the next action
+                self.current_action = next_action
                 self.current_action_time = 0
 
     def move(self, dx, dy):
@@ -92,10 +96,20 @@ class Player(Creature):
                 if col:  # dont collide on Nones
                     target_tile = self.floor.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
                     if target_tile.blocked:
+                        logger.debug('bump!')
                         collision = True
                         break
 
         logger.info('moving to %s %s' % (self.x + dx, self.y + dy))
+
+        if dx > 0 and self.direction != Creature.DIRECTIONS['right']:
+            self.direction = Creature.DIRECTIONS['right']
+            self.update_sent = False
+        elif dx < 0 and self.direction != Creature.DIRECTIONS['left']:
+            self.direction = Creature.DIRECTIONS['left']
+            self.update_sent = False
+        else:
+            pass
 
         if not collision:
             logger.info('setting fov update')
@@ -115,7 +129,8 @@ class Player(Creature):
             'coords': (self.x, self.y),
             'color': self.color,
             'hit_points': self.hit_points,
-            'sprite_state': self.get_sprite_state()
+            'sprite_state': self.get_sprite_state(),
+            'direction': self.direction
         }
 
     def get_client_init_data(self):
@@ -154,8 +169,9 @@ class Player(Creature):
         return update_package
 
     def update(self, actions):
-        for key, state in actions:
+        for key, state in actions.items():
             if state == 'release':
                 self.keys_pressed.remove(key)
             else:
                 self.keys_pressed.add(key)
+            logger.debug(self.keys_pressed)

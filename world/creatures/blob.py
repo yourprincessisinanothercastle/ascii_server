@@ -67,7 +67,6 @@ class Blob(Creature):
 
     def update(self):
         if not self.action_queue:
-            logger.info('updating blob')
             closest_player: Player = self.get_closest_player()
             if closest_player:
                 logger.info('closest player: %s, %s' % (closest_player.x, closest_player.y))

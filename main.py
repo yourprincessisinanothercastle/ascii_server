@@ -2,6 +2,7 @@ import json
 
 import click
 import asyncio
+import aiohttp_cors
 from aiohttp import web
 from pip._internal.utils import logging
 
@@ -25,6 +26,7 @@ async def remove_player(app, player):
     app['players'].remove(player)
     app['removed_players'].append(player)
     print('%s disconnected' % player)
+
 
 async def wshandler(request):
     app = request.app
@@ -122,6 +124,12 @@ async def game_loop(app):
 
 def create_app():
     app = web.Application()
+    cors = aiohttp_cors.setup(app, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+            expose_headers="*",
+            allow_headers="*"),
+    })
+
     app['state'] = {}
     app['world'] = World()
 
@@ -132,8 +140,9 @@ def create_app():
 
     app['state']['game_is_running'] = False
 
-    app.router.add_route('GET', '/connect', wshandler)
-    app.router.add_route('GET', '/', handle)
+    cors.add(app.router.add_route('GET', '/connect', wshandler))
+    cors.add(app.router.add_route('GET', '/', handle))
+
     return app
 
 

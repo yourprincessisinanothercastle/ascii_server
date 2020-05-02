@@ -41,7 +41,6 @@ class World:
 
         for level in self.levels:
             level.update_field_of_view()
-            logger.info('ticking entities in %s: %s ' % (level, level.entities))
             for creature in level.entities:
                 creature.update()
                 creature.process_action_queue(dt)
