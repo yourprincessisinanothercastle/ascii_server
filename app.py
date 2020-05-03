@@ -21,30 +21,37 @@ async def handle(request):
 
 
 async def remove_player(app, player):
-    app['world'].remove_player(player)
+    logger.info('%s disconnected, closing socket' % player)
     await player.websocket.close()
+
+    logger.info('removing player %s from world' % player)
+    app['world'].remove_player(player)
+
+    logger.info('removing player %s from app' % player)
     app['players'].remove(player)
+
     app['removed_players'].append(player)
-    print('%s disconnected' % player)
+    logger.info('players left: %s' % app['players'])
 
 
 async def wshandler(request):
     app = request.app
     ws = web.WebSocketResponse()
+    await ws.prepare(request)
 
     # auth here
     # print(request.headers)
-
+    if app['state']['game_is_running'] == False:
+        app['state']['game_is_running'] = True
+        app['world'] = World()
+        asyncio.ensure_future(game_loop(app))
     player = Player(ws)
     player.fov_needs_update = True
+
     app['world'].add_player(player)
     app['players'].append(player)
 
-    if app['state']['game_is_running'] == False:
-        app['state']['game_is_running'] = True
-        asyncio.ensure_future(game_loop(app))
 
-    await ws.prepare(request)
     await ws.send_str(json.dumps({
         'type': 'init',
         'data': player.get_client_init_data()}))
@@ -75,6 +82,7 @@ async def wshandler(request):
 
 
 async def game_loop(app):
+    logger.info('starting game loop')
     TICK_TIME = 1 / 20
 
     while 1:
@@ -97,7 +105,8 @@ async def game_loop(app):
             player.update_sent = True
 
         if app['removed_players']:
-            logger.info('sending remove_player for %s' % app['removed_players'])
+            logger.info('sending remove_player for %s to %s players' % (app['removed_players'], len(app['players'])))
+
             for player in app['players']:
                 try:
                     await player.websocket.send_str(
@@ -109,7 +118,6 @@ async def game_loop(app):
                     await remove_player(app, player)
 
             app['removed_players'] = []
-
         if not app["players"]:
             break
 
@@ -118,7 +126,7 @@ async def game_loop(app):
 
         await asyncio.sleep(TICK_TIME)
 
-    print('no clients left')
+    logger.warning('no clients left')
     app['state']['game_is_running'] = False
 
 
@@ -131,7 +139,7 @@ async def create_app():
     })
 
     app['state'] = {}
-    app['world'] = World()
+    app['world'] = None
 
     app['players'] = []
 
