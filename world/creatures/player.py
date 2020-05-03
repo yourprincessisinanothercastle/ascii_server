@@ -39,6 +39,14 @@ class Player(Creature):
 
         self.keys_pressed = set()
 
+    @property
+    def base_x(self):
+        return self.x + self.FOV_OFFSET[0]
+
+    @property
+    def base_y(self):
+        return self.y + self.FOV_OFFSET[1]
+
     def update_fov(self):
         fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.floor.map.update_visible)
 
@@ -164,7 +172,7 @@ class Player(Creature):
                             and creature.update_sent is False}
 
         if creatures_update:
-            update_package['creatures'] = creatures_update
+            update_package['entities'] = creatures_update
 
         return update_package
 

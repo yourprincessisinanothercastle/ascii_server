@@ -116,7 +116,8 @@ class Creature(Entity):
             'coords': coords,
             'is_visible': is_visible,
             'color': self.color,
-            'sprite_state': self.get_sprite_state()
+            'sprite_state': self.get_sprite_state(),
+            'direction': self.direction
         }
 
     def get_sprite_state(self):
