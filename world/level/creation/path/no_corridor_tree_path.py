@@ -156,7 +156,7 @@ class NoCorridorTreePath(PathGenerator):
                     # --- checking for previous area collision
                     top_left = self._tiles[pos[0] - 2][pos[1] - 2]
                     top_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2]
-                    bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h]
+                    bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h + 3]
                     bot_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 3]
                     free_tile = "wall"
 
