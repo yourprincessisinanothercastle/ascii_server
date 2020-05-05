@@ -133,7 +133,7 @@ class NoCorridorTreePath(PathGenerator):
             # --- generate path areas
             force_forward = 0
             for idy, points in enumerate(path_area_points_list):
-                print("AREA", idy, idx)
+                print("--- AREA", idy, idx)
                 area_budget = AreaBudget(tile_points=area_points_list[area_cntr],
                                          doorways=[])  # we don't ask to gen doors, as we will open them up from here
                 entity_budget = EntityBudget(entity_points=entity_points_list[area_cntr],
@@ -152,60 +152,39 @@ class NoCorridorTreePath(PathGenerator):
                     x_offset, y_offset = None, None
                     prev_area = area_history[area_cntr - 1][3]
                     prev_area_w, prev_area_h = len(prev_area.tiles[0]), len(prev_area.tiles[0][0])
-                    new_w_smaller, new_h_smaller = (prev_area_w > area_w), (prev_area_h > area_h)
-                    small_w, big_w = (area_w, prev_area_w) if (prev_area_w < area_w) else (prev_area_w, area_w)
-                    small_h, big_h = (area_h, prev_area_h) if (prev_area_h < area_h) else (prev_area_h, area_h)
 
                     # --- checking for previous area collision
                     top_left = self._tiles[pos[0] - 2][pos[1] - 2]
-                    top_right = self._tiles[pos[0] + prev_area_w + 2][pos[1] - 2]
-                    bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h + 2]
-                    bot_right = self._tiles[pos[0] + prev_area_w + 2][pos[1] + prev_area_h + 2]
+                    top_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2]
+                    bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h]
+                    bot_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 3]
                     free_tile = "wall"
+
+                    # TODO remove debug output tiles
+                    self._tiles[pos[0] - 2][pos[1] - 2] = str(area_cntr)
+                    self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2] = str(area_cntr)
+                    self._tiles[pos[0] - 2][pos[1] + prev_area_h + 3] = str(area_cntr)
+                    self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 3] = str(area_cntr)
 
                     if current_dir == 0 or current_dir == 2:
                         y_offset = -(area_h + pad) if current_dir == 0 else area_h + pad
                         l, r = (top_left, top_right) if current_dir == 0 else (bot_left, bot_right)
-                        print("L R!?", l, r, l == free_tile, r == free_tile)
                         if l is not free_tile:
-                            print("yoo")
-                            if new_w_smaller:
-                                x_offset = random.choice(range(0, big_w - 3))
-                            else:
-                                x_offset = random.choice(range(0, small_w - 3))
+                            x_offset = random.choice(range(0, prev_area_w - 1))
                         elif r is not free_tile:
-                            print("yoiiii")
-                            if new_w_smaller:
-                                x_offset = random.choice(range(-(small_w - 3), big_w - small_w))
-                            else:
-                                x_offset = random.choice(range(-(big_w - 3), -(big_w - small_w)))
+                            x_offset = random.choice(range(-(area_w - 1), prev_area_w - area_w))
                         else:
-                            if new_w_smaller:
-                                x_offset = random.choice(range(-(small_w - 3), big_w - 3))
-                            else:
-                                x_offset = random.choice(range(-(big_w - 3), small_w - 3))
+                            x_offset = random.choice(range(-(area_w - 1), prev_area_w - 1))
                     # --- directions: 0, 1, 2, 3 - up, right, down, left
                     elif current_dir == 1 or current_dir == 3:
                         x_offset = area_w + pad if current_dir == 1 else -(area_w + pad)
                         t, b = (top_right, bot_right) if current_dir == 1 else (top_left, bot_left)
-                        print("T B!?", t, b, t == free_tile, b == free_tile)
                         if t is not free_tile:
-                            print("yo")
-                            if new_h_smaller:
-                                y_offset = random.choice(range(0, big_h - 3))
-                            else:
-                                y_offset = random.choice(range(0, small_h - 3))
+                            y_offset = random.choice(range(0, prev_area_h - 1))
                         elif b is not free_tile:
-                            print("ye")
-                            if new_h_smaller:
-                                y_offset = random.choice(range(-(small_h - 3), big_h - small_h))
-                            else:
-                                y_offset = random.choice(range(-(big_h - 3), -(big_h - small_h)))
+                            y_offset = random.choice(range(-(area_h - 1), prev_area_h - area_h))
                         else:
-                            if new_h_smaller:
-                                y_offset = random.choice(range(-(small_h - 3), big_h - 3))
-                            else:
-                                y_offset = random.choice(range(-(big_h - 3), small_h - 3))
+                            y_offset = random.choice(range(-(area_h - 1), prev_area_h - 1))
 
                     print("old x y", pos, x_offset, y_offset)
                     pos = pos[0] + x_offset, pos[1] + y_offset

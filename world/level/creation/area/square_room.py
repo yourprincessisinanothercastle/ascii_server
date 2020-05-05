@@ -19,6 +19,5 @@ class SquareRoom(AreaGenerator):
             area.append(col)
             for y in range(0, tiles):
                 col.append(F)
-        area[0][0] = "tl"
         return area
 
