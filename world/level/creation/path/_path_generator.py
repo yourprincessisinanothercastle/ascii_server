@@ -10,7 +10,7 @@ from world.level.creation.entity import EntityBudget
 import logging
 logger = logging.getLogger(__name__)
 
-EMPTY_TILE = "-"
+EMPTY_TILE = "wall"
 
 # helper structure for 2d operations in this generator, maybe put it in a "common" package if its useful elsewhere
 Rect = NamedTuple("rect", [
@@ -23,8 +23,6 @@ Rect = NamedTuple("rect", [
 class PathGenerator(IGenerator):
     """ Creates a level map """
     level_budget: LevelBudget
-    area_budgets: List[Type[AreaBudget]]
-    entity_budgets: List[Type[EntityBudget]]
 
     # noinspection PyMethodOverriding
     def generate(self, level_budget: LevelBudget) -> GeneratorOutput:
@@ -37,7 +35,7 @@ class PathGenerator(IGenerator):
                               self.level_budget.area_weight,
                               k=area_count)
 
-    def _get_empty_map(self, total_area_budget_points: int, padding_factor: float = 10) -> List[List[str]]:
+    def _get_empty_map(self, total_area_budget_points: int, padding_factor: float = 5) -> List[List[str]]:
         """
         While ad-hoc, we base the initial map on squaring and padding the levels tile budget points
         TODO this will cause a lot of empty space - override this default function to slim down the maps

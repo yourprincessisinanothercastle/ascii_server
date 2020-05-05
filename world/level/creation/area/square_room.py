@@ -1,3 +1,4 @@
+import math
 from typing import List
 from world.level.creation.area import AreaGenerator
 
@@ -11,15 +12,13 @@ class SquareRoom(AreaGenerator):
         W = 'wall'
         F = 'floor'
 
-        return [
-            [W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W],
-            [W, F, F, F, F, F, F, F, F, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
-            [W, F, F, F, F, F, F, F, F, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
-            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
-            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
-            [W, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, W],
-            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
-            [W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W, W, F, F, F, F, F, F, W],
-            [W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W],
-        ]
+        area = []
+        tiles = round(math.sqrt(self.area_budget.tile_points))
+        for x in range(0, tiles):
+            col = []
+            area.append(col)
+            for y in range(0, tiles):
+                col.append(F)
+        area[0][0] = "tl"
+        return area
 
