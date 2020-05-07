@@ -1,9 +1,7 @@
-import json
 import random
 from typing import Type, List, Tuple
 
 from world.level.creation.path._path_generator import Rect
-from world.level.tile import TILE_NAMES
 from world.level.creation import LevelBudget, GeneratorOutput
 from world.level.creation.area import SquareRoom, AreaBudget, AreaGenerator
 
@@ -14,13 +12,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class NoCorridorTreePath(PathGenerator):
+class TwoPaths(PathGenerator):
     """
-    This generator creates square rooms packed without corridors.
+    This generator creates two paths (when able) which is likely to be circular.
     """
+    _AREA_TILES = ["floor"]
+
     def generate(self, level_budget: LevelBudget) -> GeneratorOutput:
         self.level_budget = level_budget
         self._walk_path()
+        self._trim_excess_tiles(self._AREA_TILES)
+        self.draw(debug=True)
         return GeneratorOutput(tiles=self._tiles, entities=[], player_spawn_areas=[])
 
     # TODO remove test function
@@ -62,32 +64,6 @@ class NoCorridorTreePath(PathGenerator):
             split_at = random.choice(range(min_area_path, area_count - min_area_path + 1))
             return [area_points_list[0:split_at], area_points_list[split_at:area_count]]
 
-    def _merge_area(self, area_output: GeneratorOutput, pos: Tuple[int, int]):
-        # TODO also merge entities and whatever else is needed
-        print("MERGE AT", pos)
-        for idx, col in enumerate(area_output.tiles):
-            for idy, tile in enumerate(col):
-                self._tiles[pos[0] + idx][pos[1] + idy] = tile
-
-    def draw(self):  # TODO remove debug draw version
-        """ preview output """
-        chars = dict(
-            wall='-',
-            floor='.'
-        )
-        for row_idx, row in enumerate(self._tiles):
-            drawn_row = []
-            for tile in row:
-                try:
-                    int(tile)
-                    drawn_row.append(str(tile))
-                except:
-                    drawn_row.append(chars[tile])
-            print(''.join(drawn_row))
-
-    def _check_collision(self, rect: Rect):
-        pass
-
     def _walk_path(self):
         # --- area_generators init
         area_points_list = self._get_area_points()
@@ -96,7 +72,7 @@ class NoCorridorTreePath(PathGenerator):
         area_generators: List[Type[AreaGenerator]] = self._get_area_generators(len(area_points_list))
 
         # --- setup map layout directions
-        map_dir = 0  # TODO uncomment - random.choice([0, 1, 2, 3])  # up, right, down, left
+        map_dir = random.choice([0, 1, 2, 3])  # up, right, down, left
         start, end, sideways_directions = self._get_layout_directions(self._tiles, map_dir)
         sideways_directions.sort(reverse=bool(random.getrandbits(1)))  # randomizes which direction first path takes
 
@@ -105,40 +81,42 @@ class NoCorridorTreePath(PathGenerator):
         paths = self._get_path_areas(area_points_list, min_area_path)
         # len_main_path determines how long BOTH parallel paths are going to be - any excess will be side-areas
         # TODO make side areas a random small fraction of the total rather than complete random
-        len_main_path = random.choice(range(min_area_path, min(map(len, paths)) + 1))
+        len_main_path = random.choice(range(min_area_path, min(map(len, paths)) + 1))  # + 1 as range is inkl->excl
 
         # --- generate path by path
-        # area_blocks - generated area outputs and info to join them (top-left offset, entry-direction, prev-area index, result)
+        # to keep track of generated sources (top-left offset, entry-direction, prev-area index, result)
         area_history: List[Tuple[Tuple[int, int], int, int, Type[GeneratorOutput]]] = []
-        area_cntr, i_start_area, i_end_area = 0, None, None  # indexes to "areas" above
+        area_cntr, end_path_starting_area_i = 0, None  # indexes to "areas" above
         can_take_mid = True
         for idx, path_area_points_list in enumerate(paths):
+            if idx == len(paths) - 1:
+                end_path_starting_area_i = area_cntr
             outward_dir = sideways_directions[idx % 2]
             inward_dir = sideways_directions[(idx + 1) % 2]
             has_gone_outward, has_gone_inward = False, False
-            side_areas_left = len(path_area_points_list) - len_main_path
+            side_areas_left = len(path_area_points_list) - len_main_path  # TODO does not distinguish for this yet
             pos = start
-            print("PATH / sides", idx, side_areas_left)
+            # print("PATH / sides", idx, side_areas_left)
 
             # --- sometimes a path will start off NOT going outwards directly
             if can_take_mid and bool(random.getrandbits(1)):
-                print("GOING MID", map_dir)
-                can_take_mid = False
                 current_dir = map_dir
             else:
-                print("GOING OUTWARD", map_dir)
                 has_gone_outward = True
                 current_dir = outward_dir
+            can_take_mid = False  # only starting path can take mid
 
             # --- generate path areas
             force_forward = 0
             for idy, points in enumerate(path_area_points_list):
-                print("--- AREA", idy, idx)
+                # TODO make last room in first path have a chance to be a reward-type room (last room in 2nd is exit)
+                # print("--- AREA", idy, idx)
+                is_end_area = (idx == len(paths) - 1 and idy == len(path_area_points_list) - 1)
                 area_budget = AreaBudget(tile_points=area_points_list[area_cntr],
                                          doorways=[])  # we don't ask to gen doors, as we will open them up from here
                 entity_budget = EntityBudget(entity_points=entity_points_list[area_cntr],
                                              monster_pool=self._get_area_monster_pool(),
-                                             has_exit=False)
+                                             has_exit=is_end_area)
                 area_output = area_generators[area_cntr]().generate(entity_budget=entity_budget,
                                                                     area_budget=area_budget,
                                                                     player_spawn_area_count=int(bool(area_cntr == 0)))
@@ -147,68 +125,93 @@ class NoCorridorTreePath(PathGenerator):
                 # "flip" - aligning rooms in a 2-path scenario, to avoid overlap on "middle" I hang them "outwards"
                 # which can otherwise be a problem if the new room is wider/taller than the previous one
                 area_w, area_h, pad = len(area_output.tiles), len(area_output.tiles[0]), 1
-                print("DIRECTION W/H -", current_dir, area_w, area_h)
-                if not area_cntr == 0:  # skip first as we have already set a starting pos
+                # print("DIRECTION W/H -", current_dir, area_w, area_h)
+                if area_cntr == 0:
+                    # no offset calc for first area
+                    self._merge_area(area_output, pos)
+                else:
                     x_offset, y_offset = None, None
-                    prev_area = area_history[area_cntr - 1][3]
-                    prev_area_w, prev_area_h = len(prev_area.tiles[0]), len(prev_area.tiles[0][0])
+                    prev_pos = pos
+                    prev_area = area_history[area_cntr - 1] if idy != 0 else area_history[0]  # roll-back to start
+                    prev_area_w, prev_area_h = len(prev_area[3].tiles), len(prev_area[3].tiles[0])
 
-                    # --- checking for previous area collision
+                    # --- checking for previous area collision (as reduced as I could think of)
                     top_left = self._tiles[pos[0] - 2][pos[1] - 2]
                     top_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2]
-                    bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h + 3]
-                    bot_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 3]
-                    free_tile = "wall"
+                    bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h + 1]
+                    bot_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 1]
 
                     # TODO remove debug output tiles
+                    """
                     self._tiles[pos[0] - 2][pos[1] - 2] = str(area_cntr)
                     self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2] = str(area_cntr)
-                    self._tiles[pos[0] - 2][pos[1] + prev_area_h + 3] = str(area_cntr)
-                    self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 3] = str(area_cntr)
+                    self._tiles[pos[0] - 2][pos[1] + prev_area_h + 1] = str(area_cntr)
+                    self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 1] = str(area_cntr)
+                    """
 
+                    # --- calculate new area top-left coordinate based on a previous area
+                    # directions: 0, 1, 2, 3 - up, right, down, left
                     if current_dir == 0 or current_dir == 2:
-                        y_offset = -(area_h + pad) if current_dir == 0 else area_h + pad
+                        y_offset = -(area_h + pad) if current_dir == 0 else prev_area_h + pad
                         l, r = (top_left, top_right) if current_dir == 0 else (bot_left, bot_right)
-                        if l is not free_tile:
+                        # now we decide on side-ways alignment for the new area; naively, as we only check a few tiles
+                        # TODO there WILL be overlap, but I think it's reduced enough to make it interesting
+                        if l in self._AREA_TILES:  # left is already used by an area, can't go there
                             x_offset = random.choice(range(0, prev_area_w - 1))
-                        elif r is not free_tile:
+                        elif r in self._AREA_TILES:
                             x_offset = random.choice(range(-(area_w - 1), prev_area_w - area_w))
-                        else:
+                        else:  # both sides should be free of existing areas
                             x_offset = random.choice(range(-(area_w - 1), prev_area_w - 1))
-                    # --- directions: 0, 1, 2, 3 - up, right, down, left
                     elif current_dir == 1 or current_dir == 3:
-                        x_offset = area_w + pad if current_dir == 1 else -(area_w + pad)
+                        x_offset = prev_area_w + pad if current_dir == 1 else -(area_w + pad)
                         t, b = (top_right, bot_right) if current_dir == 1 else (top_left, bot_left)
-                        if t is not free_tile:
+                        if t in self._AREA_TILES:
                             y_offset = random.choice(range(0, prev_area_h - 1))
-                        elif b is not free_tile:
+                        elif b in self._AREA_TILES:
                             y_offset = random.choice(range(-(area_h - 1), prev_area_h - area_h))
                         else:
                             y_offset = random.choice(range(-(area_h - 1), prev_area_h - 1))
 
-                    print("old x y", pos, x_offset, y_offset)
+                    # --- area merge and add to history
+                    # print("PREV x y", pos, x_offset, y_offset)
                     pos = pos[0] + x_offset, pos[1] + y_offset
+                    # print("MERGE AT", pos)
+                    self._merge_area(area_output, pos)
 
-                # --- merge and add to history
-                self._merge_area(area_output, pos)
-                self._tiles[pos[0]][pos[1]] = area_cntr  # TODO remove area debug labeling
+                    # --- change tiles between areas to "open doors"
+                    prev_area_rect = Rect(prev_pos, prev_area_w, prev_area_h)
+                    area_rect = Rect(pos, area_w, area_h)
+                    self._connect_areas(prev_area_rect, area_rect,
+                                        new_tile_name=self._AREA_TILES[0],
+                                        mutable_tile_names=[self._EMPTY_TILE])
+
+                # self._tiles[pos[0]][pos[1]] = area_cntr  # area debug labeling
                 area_history.append((pos, current_dir, area_cntr, area_output))
 
-                #print("area", idy, (idy + 1) / len(path_area_points_list) / 2)
-
                 # --- control path turning direction
-                if area_cntr == 0:
-                    i_start_area = area_cntr
-                    force_forward = 2
-                elif area_cntr == len_main_path:
-                    i_end_area = area_cntr
+                if idy == 0:
+                    force_forward = 1
+                elif is_end_area:
+                    # --- attempt to connect paths on near-end areas - only 1 additional connection
+                    connection_coords = False
+                    for first_area in area_history[-1:end_path_starting_area_i - 1:-1]:
+                        for second_area in reversed(area_history[:3]):
+                            if not connection_coords:
+                                first_area_rect = Rect(first_area[0], len(first_area[3].tiles),
+                                                       len(first_area[3].tiles[0]))
+                                second_area_rect = Rect(second_area[0], len(second_area[3].tiles),
+                                                        len(second_area[3].tiles[0]))
+                                connection_coords = self._connect_areas(first_area_rect, second_area_rect,
+                                                                        new_tile_name=self._AREA_TILES[0],
+                                                                        mutable_tile_names=[self._EMPTY_TILE],
+                                                                        must_connect=False)
                 else:
                     # avoiding direction manipulation for first/last room (shared starting-rooms for paths)
                     if force_forward > 0:
                         force_forward -= 1
                         current_dir = map_dir  # after turning, we go forward first before turning again
                     else:
-                        force_forward = 2
+                        force_forward = 1
                         if random.random() < (idy + 1) / len(path_area_points_list):
                             if not has_gone_outward:  # before 50% we will turn outwards
                                 has_gone_outward = True
@@ -218,9 +221,4 @@ class NoCorridorTreePath(PathGenerator):
                                 current_dir = inward_dir
                         else:
                             current_dir = map_dir
-
                 area_cntr += 1
-
-        self._tiles[0][0] = "0"
-        print("TIME TO DRAW!!!", len(self._tiles))
-        self.draw()

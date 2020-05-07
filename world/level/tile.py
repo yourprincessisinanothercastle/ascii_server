@@ -1,4 +1,4 @@
-TILE_NAMES = dict(floor="floor", wall="wall")
+TILE_NAMES = dict(floor="floor", wall="wall")  # TODO use python Enum('Tile', 'floor wall')
 
 class Tile:
     name = None

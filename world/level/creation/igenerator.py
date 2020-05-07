@@ -16,21 +16,26 @@ GeneratorOutput = NamedTuple("generator_output", [
 
 class IGenerator(ABC):
     """
-    common functionality shared between tile-based generators
+    common functionality shared between generators
     """
     def __init__(self):
         self._tiles: List[List[str]] = []
         self._entities: List[Entity] = []
         self._player_spawn_areas: List[Tuple[int, int]] = []
 
-    def draw(self):
-        """ preview output """
+    def draw(self, debug=False):
+        """ preview output (debug allows non-tile names, trimmed to last char) """
         chars = dict(
-            wall='W',
+            wall='-',
             floor='.'
         )
         for row_idx, row in enumerate(self._tiles):
-            drawn_row = [chars[tile] for tile in row]
+            drawn_row = []
+            for tile in row:
+                if not debug or tile in chars:
+                    drawn_row.append(chars[tile])
+                elif debug:
+                    drawn_row.append(str(tile)[-1])
             print(''.join(drawn_row))
 
     def as_json(self):
