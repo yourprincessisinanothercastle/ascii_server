@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class TwoPaths(PathGenerator):
     """
-    This generator creates two paths (when able) which is likely to be circular.
+    This generator creates two paths (when able) which are likely to connect near their ends.
+    There's also a moderate chance for area overlap for added randomness.
     """
     _AREA_TILES = ["floor"]
 
@@ -23,11 +24,11 @@ class TwoPaths(PathGenerator):
         self._walk_path()
         self._trim_excess_tiles(self._AREA_TILES)
         self.draw(debug=True)
-        return GeneratorOutput(tiles=self._tiles, entities=[], player_spawn_areas=[])
+        return GeneratorOutput(tiles=self._tiles, entities=self._entities)
 
     # TODO remove test function
     def fake_gen(self, tp=160):
-        l = LevelBudget(monster_pool=[], entity_points=200, tile_points=tp, area_pool=[SquareRoom], area_weight=[1])
+        l = LevelBudget(monster_pool=[], entity_points=tp, tile_points=tp, area_pool=[SquareRoom], area_weight=[1])
         return self.generate(l)
 
     def _get_area_monster_pool(self):
@@ -112,14 +113,19 @@ class TwoPaths(PathGenerator):
                 # TODO make last room in first path have a chance to be a reward-type room (last room in 2nd is exit)
                 # print("--- AREA", idy, idx)
                 is_end_area = (idx == len(paths) - 1 and idy == len(path_area_points_list) - 1)
+                if area_cntr == 0:
+                    level_connect_number = self.level_budget.level_number - 1
+                elif is_end_area:
+                    level_connect_number = self.level_budget.level_number + 1
+                else:
+                    level_connect_number = -1
                 area_budget = AreaBudget(tile_points=area_points_list[area_cntr],
                                          doorways=[])  # we don't ask to gen doors, as we will open them up from here
                 entity_budget = EntityBudget(entity_points=entity_points_list[area_cntr],
                                              monster_pool=self._get_area_monster_pool(),
-                                             has_exit=is_end_area)
+                                             level_connect_number=level_connect_number)
                 area_output = area_generators[area_cntr]().generate(entity_budget=entity_budget,
-                                                                    area_budget=area_budget,
-                                                                    player_spawn_area_count=int(bool(area_cntr == 0)))
+                                                                    area_budget=area_budget)
 
                 # --- set new pos depending on previous (except for start area)
                 # "flip" - aligning rooms in a 2-path scenario, to avoid overlap on "middle" I hang them "outwards"
@@ -135,13 +141,14 @@ class TwoPaths(PathGenerator):
                     prev_area = area_history[area_cntr - 1] if idy != 0 else area_history[0]  # roll-back to start
                     prev_area_w, prev_area_h = len(prev_area[3].tiles), len(prev_area[3].tiles[0])
 
-                    # --- checking for previous area collision (as reduced as I could think of)
+                    # --- checking-vars for previous area collision (as reduced as I could think of)
+                    # since its so reduced, we will generate overlapping areas here and there (a nice amount =)
                     top_left = self._tiles[pos[0] - 2][pos[1] - 2]
                     top_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2]
                     bot_left = self._tiles[pos[0] - 2][pos[1] + prev_area_h + 1]
                     bot_right = self._tiles[pos[0] + prev_area_w + 1][pos[1] + prev_area_h + 1]
 
-                    # TODO remove debug output tiles
+                    # TODO remove collision corners debug output
                     """
                     self._tiles[pos[0] - 2][pos[1] - 2] = str(area_cntr)
                     self._tiles[pos[0] + prev_area_w + 1][pos[1] - 2] = str(area_cntr)
@@ -155,7 +162,6 @@ class TwoPaths(PathGenerator):
                         y_offset = -(area_h + pad) if current_dir == 0 else prev_area_h + pad
                         l, r = (top_left, top_right) if current_dir == 0 else (bot_left, bot_right)
                         # now we decide on side-ways alignment for the new area; naively, as we only check a few tiles
-                        # TODO there WILL be overlap, but I think it's reduced enough to make it interesting
                         if l in self._AREA_TILES:  # left is already used by an area, can't go there
                             x_offset = random.choice(range(0, prev_area_w - 1))
                         elif r in self._AREA_TILES:
@@ -191,6 +197,7 @@ class TwoPaths(PathGenerator):
                 # --- control path turning direction
                 if idy == 0:
                     force_forward = 1
+                    current_dir = map_dir
                 elif is_end_area:
                     # --- attempt to connect paths on near-end areas - only 1 additional connection
                     connection_coords = False
@@ -206,10 +213,9 @@ class TwoPaths(PathGenerator):
                                                                         mutable_tile_names=[self._EMPTY_TILE],
                                                                         must_connect=False)
                 else:
-                    # avoiding direction manipulation for first/last room (shared starting-rooms for paths)
                     if force_forward > 0:
                         force_forward -= 1
-                        current_dir = map_dir  # after turning, we go forward first before turning again
+                        current_dir = map_dir
                     else:
                         force_forward = 1
                         if random.random() < (idy + 1) / len(path_area_points_list):

@@ -3,9 +3,8 @@ import random
 from typing import Type, List, Tuple, NamedTuple, Set
 
 from world.level.creation import IGenerator, GeneratorOutput
-from world.level.creation.area import AreaGenerator, AreaBudget
+from world.level.creation.area import AreaGenerator
 from world.level.creation import LevelBudget
-from world.level.creation.entity import EntityBudget
 
 import logging
 logger = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ class PathGenerator(IGenerator):
                         yt = idy
                     if not yb or idy > yb:
                         yb = idy
-        if xl: xl += -1
+        if xl: xl += -1  # somehow, these additions cause false values if I do it in the loops above - dont get it
         if xr: xr += 2
         if yt: yt += -1
         if yb: yb += 2
@@ -71,15 +70,13 @@ class PathGenerator(IGenerator):
         for _idy, _column in enumerate(self._tiles):
             self._tiles[_idy] = _column[yt:yb]
         for entity in self._entities:  # have to shift entities as well
-            # TODO these new offsets needs to be checked (to avoid putting them inside walls)
             if xl:
-                entity.x -= xl - 1
+                entity.x -= xl
             if yt:
-                entity.y -= yt - 1
+                entity.y -= yt
 
     def _unstack_entities(self):
         """ Path_generators are allowed to overlap areas and thus might stack entities """
-        moves = [-1, 0, 1]
         occupied = dict()
         for e in self._entities:
             key = f'x{e.x}y{e.y}'
@@ -87,28 +84,31 @@ class PathGenerator(IGenerator):
                 occupied[key] = []
             occupied[key].append(e)
 
-        def check(x, y):
+        moves = [-1, 0, 1]
+
+        def get_adjacent_unoccupied_coord(x, y, start_pos):
             if f'x{x}y{y}' not in occupied:
                 return x, y
-            elif x == 1 and y == 1:
+            elif x == start_pos[0] + 1 and y == start_pos[1] + 1:
                 return None  # no adjacent tiles left to check
             else:
-                xi, yi = moves.index(x), moves.index(y)
+                xi, yi = moves.index(start_pos[0] - x), moves.index(start_pos[1] - y)
                 if len(moves) - 1 == yi:
                     _y = moves[0]
                     _x = moves[xi + 1]  # skipping condition for ending, as "elif" above should block it
                 else:
+                    _x = moves[1]  # stay the same
                     _y = moves[yi + 1]
-                return check(x, y)
+                return get_adjacent_unoccupied_coord(x + _x, y + _y, start_pos)
 
         for key, entities in occupied.items():
             if len(entities) > 1:
                 for entity in entities:
-                    coords = check(entity.x, entity.y)
+                    coords = get_adjacent_unoccupied_coord(entity.x, entity.y, (entity.x, entity.y))
                     if coords:
                         entity.x, entity.y = coords
                     else:
-                        self._entities.remove(entity)  # TODO delete for now, but check further later...
+                        self._entities.remove(entity)  # TODO delete when theres no free space (simple for now)
 
     def _get_entity_points(self, area_points: List[int]):
         # TODO not yet sure what im balancing points against, so simply the same as area for now
@@ -122,8 +122,6 @@ class PathGenerator(IGenerator):
 
         rest = round(self.level_budget.tile_points * 3)  # TODO reset to * 2
         areas = []
-
-        print("TILES", rest)
 
         def get_size():
             # TODO might want a weighed distribution - should big rooms be as common as medium?
@@ -148,7 +146,7 @@ class PathGenerator(IGenerator):
             areas = areas[0:max_areas]
 
         areas.reverse()  # there's a slightly larger chance for a small room at the end, which is nicer for player start
-        print("AREAS", len(areas), areas)
+        #print("AREAS", len(areas), areas)
         return areas
 
     def _merge_area(self, area_output: GeneratorOutput, pos: Tuple[int, int]):

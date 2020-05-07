@@ -5,6 +5,7 @@ from world.level.creation.area import AreaGenerator
 
 # Note: I set this struct aside to avoid circular import issues
 LevelBudget = NamedTuple("level_budget", [
+    ("level_number", int),
     ("monster_pool", List[Type[Creature]]),  # subset of possible monsters for this level
     ("entity_points", int),
     ("area_pool", List[Type[AreaGenerator]]),  # subset of possible areas for this level

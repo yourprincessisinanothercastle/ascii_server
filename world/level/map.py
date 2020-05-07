@@ -1,8 +1,10 @@
 import random
-from typing import Type, List
+from typing import List, Tuple
 from world.entity import Entity
+from world.interactables import LevelExit
+from world.level.creation._invalid_output import InvalidOutputException
 from world.level.tile import TILE_MAP, Tile
-from world.level.creation import IGenerator, GeneratorOutput, LevelGenerator
+from world.level.creation import GeneratorOutput, LevelGenerator
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,8 +20,12 @@ class Map:
         self.entities: List[Entity] = self._map.entities
         self.tiles: dict = self._tiles_from_map_json()
 
-    def get_tile(self, row, col) -> Tile:
-        return self.tiles[row][col]
+    def get_tile(self, row, col) -> Tile or None:
+        """ allows for out of bounds lookup, to enable sweeping checks """
+        try:
+            return self.tiles[row][col]
+        except IndexError:
+            return None
 
     def _tiles_from_map_json(self) -> dict:
         result = {}
@@ -93,15 +99,52 @@ class Map:
 
         return self.tiles[y][x].block_sight
 
-    def _random_coords(self, x1_y1, x2_y2):
+    def random_coords(self, x1_y1, x2_y2):
         x1, y1 = x1_y1
         x2, y2 = x2_y2
         return random.randint(x1 * TILE_SIZE, x2 * TILE_SIZE), random.randint(y1 * TILE_SIZE, y2 * TILE_SIZE)
 
-    def get_player_spawn(self):
+    def depricated_get_player_spawn(self):
         random_spawn_area = random.choice(self._map.player_spawn_areas)
         print(random_spawn_area)
-        return self._random_coords(*random_spawn_area)
+        return self.random_coords(*random_spawn_area)
+
+    def get_player_spawn(self, coming_from_level_nr: int = None):
+        """
+        The idea is that we match exits by their level_number, to move up and down levels freely
+        If no level is supplied, we pick the lowest level_nr exit (which makes the game linear downwards)
+        """
+        entrance = None
+        for entity in self._map.entities:
+            if isinstance(entity, LevelExit):
+                if coming_from_level_nr:
+                    if entity.level_number == coming_from_level_nr:
+                        entrance = entity
+                else:
+                    if not entrance or entrance.level_number > entity.level_number:
+                        entrance = entity
+
+        if not entrance:
+            raise InvalidOutputException("No exit matched as entrance, cannot choose spawn area")
+        else:
+            viable_tiles = list(filter(lambda a: bool(a),  self.get_adjacent(entrance.x, entrance.y)))
+            spawn_area = random.choice(viable_tiles)[1]
+            print("spawn", spawn_area)
+            return spawn_area
+
+    def get_adjacent(self, x: int, y: int) -> List[Tuple[str or None, Tuple[int, int]]]:
+        """ Collect all 8 tiles around target, inkl coords for each"""
+        # TODO make it dynamic so we can radiate outwards from center, asked by radius
+        return [
+            (self.get_tile(y - 1, x - 1), (y - 1, x - 1)),
+            (self.get_tile(y, x - 1), (y, x - 1)),
+            (self.get_tile(y + 1, x - 1), (y + 1, x - 1)),
+            (self.get_tile(y - 1, x), (y - 1, x)),
+            (self.get_tile(y + 1, x), (y + 1, x)),
+            (self.get_tile(y - 1, x + 1), (y - 1, x + 1)),
+            (self.get_tile(y, x + 1), (y, x + 1)),
+            (self.get_tile(y + 1, x + 1), (y + 1, x + 1))
+        ]
 
     def draw(self):
         # TODO is this function redundant now that a generator can draw the current map?

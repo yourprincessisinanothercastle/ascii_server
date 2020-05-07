@@ -20,36 +20,30 @@ class AreaGenerator(IGenerator):
     area_budget: AreaBudget
     entity_budget: EntityBudget
 
-    _tiles: List[List[str]]
-    _entities: List[Entity]
-    _player_spawn_areas: List[Tuple[Tuple[int, int], Tuple[int, int]]]
-
     # noinspection PyMethodOverriding
     def generate(self, area_budget: AreaBudget = AreaBudget(tile_points=0,
                                                             doorways=[]),
                  entity_budget: EntityBudget = EntityBudget(monster_pool=[],
                                                             entity_points=0,
-                                                            has_exit=False),
-                 player_spawn_area_count: int = 1) -> GeneratorOutput:
+                                                            level_connect_number=-1)) -> GeneratorOutput:
         """ Starts generating an area subset of a level """
         self.area_budget = area_budget
         self.entity_budget = entity_budget
 
         self._tiles = self._generate_tiles()
-        self._entities = self._generate_entities()
-        self._player_spawn_areas = self._generate_player_spawn_areas(player_spawn_area_count)
+        self._entities = self._generate_entities().entities  # TODO ignoring if entity-gen changed tiles
 
-        return GeneratorOutput(self._entities, self._tiles, self._player_spawn_areas)
+        return GeneratorOutput(self._entities, self._tiles)
 
     def _generate_player_spawn_areas(self, player_spawn_area_count: int) -> ((int, int), (int, int)):
-        # TODO implement real generation based on tiles
+        """ Generating a player spawn based around a present exit """
         def get_valid_location():
             return (1, 1), (2, 2)
 
         return [get_valid_location() for i in range(player_spawn_area_count)]
 
     # this method mostly exists on its own for easy overriding (for handmade rooms, etc)
-    def _generate_entities(self) -> List[Entity]:
+    def _generate_entities(self) -> GeneratorOutput:
         return EntityGenerator().generate(self.entity_budget, self._tiles)
 
     # implement in subclass - this is a test output

@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Type, List, Tuple
+from typing import Type, List, Tuple, Callable
 from world.creatures import Creature, Blob
 from world.level.creation import IGenerator, GeneratorOutput, LevelBudget
 from world.level.creation.area import SquareRoom, AreaGenerator
@@ -37,7 +37,6 @@ class LevelGenerator(IGenerator):
         # setting these vars so that its easy to draw/as_json directly from LevelGenerator
         self._tiles = path_output.tiles
         self._entities = path_output.entities
-        self._player_spawn_areas = path_output.player_spawn_areas
 
         # final generated result
         return path_output
@@ -54,6 +53,7 @@ class LevelGenerator(IGenerator):
         monster_pool = self.assemble_monster_pool(level_nr, difficulty)
 
         self.level_budget = LevelBudget(
+            level_number=level_nr,  # used for exits to know which number to go to
             tile_points=tile_points,
             area_pool=area_pool,
             area_weight=area_weight,

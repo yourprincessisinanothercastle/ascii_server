@@ -52,7 +52,7 @@ class Player(Creature):
             for col_idx, col in enumerate(row):
                 if col:  # dont collide on Nones
                     target_tile = self.floor.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
-                    if target_tile.blocked:
+                    if target_tile is None or target_tile.blocked:
                         collision = True
                         break
 
