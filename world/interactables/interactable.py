@@ -19,6 +19,7 @@ class Interactable(Entity):
         self.set_interact_rules(interaction_rules)
 
     def set_callback(self, callback: Callable):
+        # TODO unsure if we will want this - if the game will call interact() directly on entities we might not
         self._callback = callback
 
     def set_interact_rules(self, interaction_rules: InteractionRules):

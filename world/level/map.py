@@ -112,7 +112,7 @@ class Map:
     def get_player_spawn(self, coming_from_level_nr: int = None):
         """
         The idea is that we match exits by their level_number, to move up and down levels freely
-        If no level is supplied, we pick the lowest level_nr exit (which makes the game linear downwards)
+        If no level is supplied, we pick the lowest level_nr exit
         """
         entrance = None
         for entity in self._map.entities:
@@ -129,7 +129,6 @@ class Map:
         else:
             viable_tiles = list(filter(lambda a: bool(a),  self.get_adjacent(entrance.x, entrance.y)))
             spawn_area = random.choice(viable_tiles)[1]
-            print("spawn", spawn_area)
             return spawn_area
 
     def get_adjacent(self, x: int, y: int) -> List[Tuple[str or None, Tuple[int, int]]]:

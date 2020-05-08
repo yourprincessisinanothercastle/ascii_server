@@ -35,13 +35,6 @@ class AreaGenerator(IGenerator):
 
         return GeneratorOutput(self._entities, self._tiles)
 
-    def _generate_player_spawn_areas(self, player_spawn_area_count: int) -> ((int, int), (int, int)):
-        """ Generating a player spawn based around a present exit """
-        def get_valid_location():
-            return (1, 1), (2, 2)
-
-        return [get_valid_location() for i in range(player_spawn_area_count)]
-
     # this method mostly exists on its own for easy overriding (for handmade rooms, etc)
     def _generate_entities(self) -> GeneratorOutput:
         return EntityGenerator().generate(self.entity_budget, self._tiles)
