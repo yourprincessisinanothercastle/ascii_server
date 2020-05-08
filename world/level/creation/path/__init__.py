@@ -1,8 +1,7 @@
 from world.level.creation.path._path_generator import PathGenerator
-from world.level.creation.path.tree_path import TreePath
-
+from world.level.creation.path.two_paths import TwoPaths
 
 # Add all path generators here, so the level generator can pick them up
 PATH_GENERATORS = dict(
-    tree_path=TreePath
+    no_corridor_tree_path=TwoPaths
 )

@@ -49,6 +49,7 @@ class Level:
             # todo: base on data from generator
             logger.info('adding %s at %s, %s' % (entity, entity.x, entity.y))
             self.spawn_entity(entity)
+        self.map.get_player_spawn()  # TODO remove this call, its just for quick testing
 
     def remove_entity(self, entity: Entity):
         logger.info('removing entity %s from level: %s' % (entity, self))

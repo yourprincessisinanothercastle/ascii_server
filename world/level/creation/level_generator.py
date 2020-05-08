@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Type, List, Tuple
+from typing import Type, List, Tuple, Callable
 from world.creatures import Creature, Blob
 from world.level.creation import IGenerator, GeneratorOutput, LevelBudget
 from world.level.creation.area import SquareRoom, AreaGenerator
@@ -37,25 +37,26 @@ class LevelGenerator(IGenerator):
         # setting these vars so that its easy to draw/as_json directly from LevelGenerator
         self._tiles = path_output.tiles
         self._entities = path_output.entities
-        self._player_spawn_areas = path_output.player_spawn_areas
 
         # final generated result
         return path_output
 
     def _set_path(self, level_nr: int):
         # TODO make choosing a generator a random choice "depending on ..."
-        self.path = PATH_GENERATORS["tree_path"]()
+        self.path = PATH_GENERATORS["no_corridor_tree_path"]()
 
     def _set_budget(self, level_nr: int, difficulty: int):
         """ takes the total budget and splits it up for the level sub-generators (area, path, entity) """
         tile_points = self.tile_point_formula(level_nr)
-        area_pool = self.assemble_area_pool(level_nr)
+        area_pool, area_weight = self.assemble_area_pool(level_nr)
         entity_points = self.entity_point_formula(level_nr, difficulty, tile_points)
         monster_pool = self.assemble_monster_pool(level_nr, difficulty)
 
         self.level_budget = LevelBudget(
+            level_number=level_nr,  # used for exits to know which number to go to
             tile_points=tile_points,
             area_pool=area_pool,
+            area_weight=area_weight,
             entity_points=entity_points,
             monster_pool=monster_pool
         )
@@ -69,9 +70,10 @@ class LevelGenerator(IGenerator):
         level_flat = level_nr * 2
         return math.ceil((base_points + tile_points + level_flat) * (0.8 + difficulty * 0.1 * 2))
 
-    def assemble_area_pool(self, level_nr: int) -> List[Type[AreaGenerator]]:
+    def assemble_area_pool(self, level_nr: int) -> Tuple[List[Type[AreaGenerator]], List[int]]:
         # TODO devise some form of picking hierarchy for areas tied to levels?
-        return [SquareRoom]
+        # TODO right now each picked area is weighed equally, make something up to change it =)
+        return [SquareRoom], [1]  # pool and matching weights
 
     def tile_point_formula(self, level_nr: int, random_offset: Tuple[float, float] = (0.9, 1.1)) -> int:
         """

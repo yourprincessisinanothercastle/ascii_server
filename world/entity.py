@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from world.level.level import Level
 
 # use one of these for inherited types
-ENTITY_TYPE = Enum('ENTITY_TYPE', 'creature item interact exit')
+ENTITY_TYPE = Enum('ENTITY_TYPE', 'creature item interact')
 
 
 class Entity:
