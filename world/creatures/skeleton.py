@@ -13,6 +13,13 @@ class Skeleton(Creature):
         hit=.20
     )
 
+
+    HITBOX = [
+        [None, None, None, None, None],
+        [None, 'X', 'X', 'X', None],
+        [None, 'X', 'X', 'X', None],
+    ]
+
     def __init__(self, x: int = 0, y: int = 0, life: int = 15, damage: int = 5):
         super().__init__(x, y,
                          view_radius=10,
