@@ -1,5 +1,6 @@
 from typing import Callable, NamedTuple
 
+from world.creatures import Creature
 from world.entity import Entity, ENTITY_TYPE
 
 
@@ -38,3 +39,15 @@ class Interactable(Entity):
     def _on_interact(self):
         """ When sub-classing a new interactable, all effect logic should come from here """
         raise NotImplementedError
+
+    def get_client_info(self):
+        coords = (self.x, self.y)
+        return {
+            'entity_type': 'interactable',
+            'sprite_name': self.sprite_name,
+            'coords': coords,
+            'is_visible': True,
+            'color': 200,
+            'sprite_state': 'idle',
+            'direction': Creature.DIRECTIONS['right']
+        }

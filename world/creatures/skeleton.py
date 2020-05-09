@@ -7,10 +7,11 @@ logger = logging.getLogger(__name__)
 
 
 class Skeleton(Creature):
-    creature_type = 'skeleton'
+    sprite_name = 'skeleton'
     ACTION_TIME = dict(
         move=.5,
-        hit=.20
+        attack=.20,
+        cooldown=.50
     )
 
 

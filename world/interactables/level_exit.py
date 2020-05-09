@@ -16,6 +16,7 @@ class LevelExit(Interactable):
                  interaction_rules: InteractionRules = None, callback: Callable = None):
         super().__init__(x, y, interaction_rules, callback)
         self.level_number = level_number
+        self.sprite_name = 'level_exit'
 
     def _on_interact(self) -> int:
         return self.level_number

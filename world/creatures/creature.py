@@ -1,5 +1,4 @@
 import logging
-import uuid
 from typing import TYPE_CHECKING, Tuple, List
 
 from util.coord_helpers import distance
@@ -25,10 +24,8 @@ class Creature(Entity):
 
     ACTION_TIME = dict(
         move=.10,
-        hit=.20
+        attack=.20
     )
-
-    creature_type: str  # should be set in each sub-class
 
     def __init__(self, x: int, y: int,
                  view_radius: int = 0,
@@ -41,9 +38,6 @@ class Creature(Entity):
 
         self.current_action: Tuple = ()  # ( method, (args,) )
         self.current_action_time: int = 0
-        self.uid = uuid.uuid4()
-        self.update_sent = False
-        self.last_seen_at = None  # (0, 0)
         
         self.direction = Creature.DIRECTIONS['right']
 
@@ -132,7 +126,8 @@ class Creature(Entity):
             return False
 
         return {
-            'type': self.creature_type,
+            'entity_type': self.entity_type,
+            'sprite_name': self.sprite_name,
             'coords': coords,
             'is_visible': is_visible,
             'color': self.color,
@@ -243,7 +238,7 @@ class Creature(Entity):
                 logger.info('self: %s, %s' % (self.x, self.y))
                 if self.collides_with_entity(closest_player):
                     logger.info('hit!')
-                    self.add_action(self.hit)
+                    self.add_action(self.attack)
 
                 else:
                     if closest_player.x < self.x:

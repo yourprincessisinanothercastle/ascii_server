@@ -1,4 +1,6 @@
 from typing import List
+
+from world.entity import ENTITY_TYPE
 from world.level.creation import LevelGenerator
 from world.level.level import Level
 
@@ -41,6 +43,7 @@ class World:
 
         for level in self.levels:
             level.update_field_of_view()
-            for creature in level.entities:
-                creature.update()
-                creature.process_action_queue(dt)
+            for entity in level.entities:
+                entity.update()
+                if entity.entity_type == ENTITY_TYPE['creature']:
+                    entity.process_action_queue(dt)

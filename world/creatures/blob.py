@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Blob(Creature):
-    creature_type = 'blob'
+    sprite_name = 'blob'
     ACTION_TIME = dict(
         move=1.,
         attack=.20,
