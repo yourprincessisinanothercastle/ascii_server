@@ -51,29 +51,29 @@ class PathGenerator(IGenerator):
         return empty_map
 
     def _trim_excess_tiles(self, tile_names_to_keep: List[str]):
-        xl, xr, yt, yb = None, None, None, None
+        left, right, top, bottom = None, None, None, None
         for idx, column in enumerate(self._tiles):
             for idy, cell in enumerate(column):
                 if cell in tile_names_to_keep:
-                    if not xl:
-                        xl = idx
-                    xr = idx
-                    if not yt or idy < yt:
-                        yt = idy
-                    if not yb or idy > yb:
-                        yb = idy
-        if xl: xl += -1  # somehow, these additions cause false values if I do it in the loops above - dont get it
-        if xr: xr += 2
-        if yt: yt += -1
-        if yb: yb += 2
-        self._tiles = self._tiles[xl:xr]
+                    if not left:
+                        left = idx
+                    right = idx
+                    if not top or idy < top:
+                        top = idy
+                    if not bottom or idy > bottom:
+                        bottom = idy
+        if left: left += -1  # somehow, these additions cause false values if I do it in the loops above - dont get it
+        if right: right += 2
+        if top: top += -1
+        if bottom: bottom += 2
+        self._tiles = self._tiles[left:right]
         for _idy, _column in enumerate(self._tiles):
-            self._tiles[_idy] = _column[yt:yb]
+            self._tiles[_idy] = _column[top:bottom]
         for entity in self._entities:  # have to shift entities as well
-            if xl:
-                entity.x -= xl
-            if yt:
-                entity.y -= yt
+            if left:
+                entity.x -= left
+            if top:
+                entity.y -= top
 
     def _unstack_entities(self):
         """ Path_generators are allowed to overlap areas and thus might stack entities """
@@ -108,7 +108,7 @@ class PathGenerator(IGenerator):
                     if coords:
                         entity.x, entity.y = coords
                     else:
-                        self._entities.remove(entity)  # TODO delete when theres no free space (simple for now)
+                        self._entities.remove(entity)  # TODO delete when there's no free space (simple for now)
 
     def _get_entity_points(self, area_points: List[int]):
         # TODO not yet sure what im balancing points against, so simply the same as area for now
@@ -120,7 +120,7 @@ class PathGenerator(IGenerator):
         max_size = min(round(self.level_budget.tile_points / 2), 200)  # TODO very rough placeholder
         min_areas, max_areas = 3, 25
 
-        rest = round(self.level_budget.tile_points * 3)  # TODO reset to * 2
+        rest = round(self.level_budget.tile_points * 2)
         areas = []
 
         def get_size():
@@ -168,14 +168,13 @@ class PathGenerator(IGenerator):
                         entity.y = pos[1] + idy
                         self._entities.append(entity)
 
-
     def _connect_areas(self, prev_area_rect: Rect, area_rect: Rect,
                        new_tile_name: str, mutable_tile_names: List[str],
                        must_connect=True) -> Tuple[int, int] or None:
         """
         Will open a path between 2 areas by running a straight line as long as "mutable_tile_names"
-        are encountered along the way. The path will stop if a non-mutable tile is found in the middle.
-        Assumes tiles represented by both area Rects are found in self._tiles.
+        are encountered along the way. The path will stop if a non-mutable tile is found and considered done.
+        Assumes that tiles represented by both area Rects are found in self._tiles.
 
         Returns connection starting coords ("None" if no connection was made)
         """
@@ -187,14 +186,14 @@ class PathGenerator(IGenerator):
             else:
                 return None
 
-        def bulldoze(_x, _y, step_offset: Tuple[int, int]):
+        def recursive_bulldoze(_x, _y, step_offset: Tuple[int, int]):
             if self._tiles[_x][_y] in mutable_tile_names:
                 self._tiles[_x][_y] = new_tile_name
                 new_x, new_y = _x + step_offset[0], _y + step_offset[1]
                 if new_x < len(self._tiles) and new_y < len(self._tiles[0]):
-                    bulldoze(new_x, new_y, step_offset)
+                    recursive_bulldoze(new_x, new_y, step_offset)
 
-        len_limit = 20
+        len_limit = 20  # Upper limit for how long the connection corridor can run
         if prev_area_rect.xy[0] > area_rect.xy[0]:
             distance_x = area_rect.xy[0] + area_rect.w - prev_area_rect.xy[0]
         else:
@@ -211,14 +210,14 @@ class PathGenerator(IGenerator):
             x = random.choice(list(area_intersections[0][0]))
             y = prev_area_rect.xy[1] if prev_area_rect.xy[1] > area_rect.xy[1] else area_rect.xy[1]
             # making sure that both sides of the new xy is opened up (in case a Rect has walls within it)
-            bulldoze(x, y - 1, (0, -1))
-            bulldoze(x, y + 1, (0, 1))
+            recursive_bulldoze(x, y - 1, (0, -1))
+            recursive_bulldoze(x, y + 1, (0, 1))
             self._tiles[x][y] = new_tile_name  # always fill the inner-edge, since we step away from it
         elif area_intersections[0][1] and abs(distance_x) < len_limit:
             x = prev_area_rect.xy[0] if prev_area_rect.xy[0] > area_rect.xy[0] else area_rect.xy[0]
             y = random.choice(list(area_intersections[0][1]))
-            bulldoze(x - 1, y, (-1, 0))
-            bulldoze(x + 1, y, (1, 0))
+            recursive_bulldoze(x - 1, y, (-1, 0))
+            recursive_bulldoze(x + 1, y, (1, 0))
             self._tiles[x][y] = new_tile_name
         return x, y if x and y else None
 

@@ -32,6 +32,7 @@ class TwoPaths(PathGenerator):
         return self.generate(l)
 
     def _get_area_monster_pool(self):
+        # TODO make distinctions for different monsters per area
         return self.level_budget.monster_pool
 
     def _get_layout_directions(self, empty_map: List[List[str]], direction: int,

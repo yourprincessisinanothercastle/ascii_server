@@ -24,7 +24,8 @@ class IGenerator(ABC):
     def draw(self, debug=False):
         """ preview output (debug allows non-tile names, trimmed to last char) """
         chars = dict(
-            wall='-',
+            empty='-',
+            wall='W',
             floor='.'
         )
         for row_idx, row in enumerate(self._tiles):
@@ -40,7 +41,7 @@ class IGenerator(ABC):
         return json.dumps(GeneratorOutput(entities=self._entities,
                                           tiles=self._tiles))
 
-    def get_tile(self, x: int, y: int):
+    def get_tile(self, x: int, y: int) -> str or None:
         """ Use in iterative checks to avoid index-errors """
         try:
             return self._tiles[x][y]

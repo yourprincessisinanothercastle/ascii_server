@@ -22,7 +22,7 @@ class World:
         self.init_world()
 
     def init_world(self):
-        # TODO add func to progress the world with next level (generated lvl exits gets and incremented lvl_nr maybe)
+        # TODO add func to progress the world with next level (generated exits have lvl_nrs we can match)
         level_generator = LevelGenerator(len(self.levels) + 1, self.difficulty)
         self.start_level = Level(level_generator)
         self.start_level.init()

@@ -4,7 +4,7 @@ import logging
 
 from app import create_app
 from init_logging import init_logging
-from world.level.creation.area import AREA_GENERATORS
+from world.level.creation import LevelGenerator
 
 init_logging('debug')
 
@@ -25,7 +25,7 @@ def run():
 @cli.command()
 @click.argument('generator_name')
 def gen_map(generator_name):
-    generator = AREA_GENERATORS[generator_name]()
+    generator = LevelGenerator()
     generator.generate()
     generator.draw()
 

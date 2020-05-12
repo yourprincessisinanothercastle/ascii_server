@@ -1,7 +1,8 @@
 import math
 import random
-from typing import Type, List, Tuple, Callable
-from world.creatures import Creature, Blob
+from typing import Type, List, Tuple
+from world.creatures import Creature, Blob, Skeleton, Bestiary
+from world.creatures.bestiary import Appearance
 from world.level.creation import IGenerator, GeneratorOutput, LevelBudget
 from world.level.creation.area import SquareRoom, AreaGenerator
 from world.level.creation.path import PathGenerator, PATH_GENERATORS
@@ -61,9 +62,9 @@ class LevelGenerator(IGenerator):
             monster_pool=monster_pool
         )
 
-    def assemble_monster_pool(self, level_nr: int, difficulty: int) -> List[Type[Creature]]:
+    def assemble_monster_pool(self, level_nr: int, difficulty: int) -> List[Appearance]:
         # TODO pick monsters from many, categorize them by "first level seen" somehow connected to difficulty
-        return [Blob]
+        return Bestiary.get_monster_pool(level_nr)
 
     def entity_point_formula(self, level_nr: int, difficulty: int, tile_points: int) -> int:
         base_points = GLOBAL_VALUE_INDEX

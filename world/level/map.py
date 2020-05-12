@@ -100,14 +100,10 @@ class Map:
         return self.tiles[y][x].block_sight
 
     def random_coords(self, x1_y1, x2_y2):
+        # TODO not in use right now (originally for player spawn location) but maybe this is useful later...
         x1, y1 = x1_y1
         x2, y2 = x2_y2
         return random.randint(x1 * TILE_SIZE, x2 * TILE_SIZE), random.randint(y1 * TILE_SIZE, y2 * TILE_SIZE)
-
-    def depricated_get_player_spawn(self):
-        random_spawn_area = random.choice(self._map.player_spawn_areas)
-        print(random_spawn_area)
-        return self.random_coords(*random_spawn_area)
 
     def get_player_spawn(self, coming_from_level_nr: int = None):
         """

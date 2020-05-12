@@ -1,19 +1,16 @@
 import random
-from typing import List, NamedTuple, Type, Tuple, Callable
+from typing import List, NamedTuple, Tuple
 
-from world.interactables.interactable import InteractionRules
+from world.creatures.bestiary import Appearance
+from world.interactables import LevelExit, InteractionRules
 from world.level.creation import IGenerator, GeneratorOutput
-from world.interactables import LevelExit
-from world.creatures import Bestiary, Creature
-
-import logging
-
 from world.level.creation._invalid_output import InvalidOutputException
 
+import logging
 logger = logging.getLogger(__name__)
 
 EntityBudget = NamedTuple("entity_budget", [
-    ("monster_pool", List[Type[Creature]]),  # possible subset (less than level subset) of monsters to draw from
+    ("monster_pool", List[Appearance]),  # possible subset (less than level subset) of monsters to draw from
     ("entity_points", int),
     ("level_connect_number", int)  # the level-number the exit should lead to | -1 indicates no exit
 ])
@@ -47,6 +44,9 @@ class EntityGenerator(IGenerator):
         # if we want entities to make changes, make a sub-class to alter layout for specific conditions tied to an area
         return GeneratorOutput(entities=self._entities, tiles=[])
 
+    def _generate_creature(self):
+        pass
+
     def _add_exit(self, minimum_spawn_area=4):
         if self.entity_budget.level_connect_number != -1:
             has_exit = False
@@ -74,12 +74,19 @@ class EntityGenerator(IGenerator):
                 raise InvalidOutputException("Could not fit an exit with adjacent free tiles in area")
 
     def _add_creatures(self):
-        # TODO do better than one of each from the pool - we want to have weights and chances
-        for creature in Bestiary.get_creature_pool():
-            if len(self._viable_coords) == 0:
-                return  # no more available space
+        rest = self.entity_budget.entity_points
+        while rest > 0:
+            affordable = list(filter(lambda a: a.price <= rest, self.entity_budget.monster_pool))
+            if len(affordable) == 0 or len(self._viable_coords) == 0:
+                return  # out of points or available space
+
+            weights = list(map(lambda a: a.weight, affordable))
+            appearance = random.choices(affordable, weights, k=1)[0]
+            rest -= appearance.price
+
+            # TODO simple random place right now, no clustering for real monster packs YET
             coords = self._viable_coords.pop(random.choice(range(0, len(self._viable_coords))))
-            self._entities.append(creature(x=coords[0], y=coords[1]))
+            self._entities.append(appearance.creature_class(x=coords[0], y=coords[1]))
 
     # noinspection PyMethodOverriding
     def draw(self):

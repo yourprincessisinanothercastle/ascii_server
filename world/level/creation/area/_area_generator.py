@@ -31,13 +31,13 @@ class AreaGenerator(IGenerator):
         self.entity_budget = entity_budget
 
         self._tiles = self._generate_tiles()
-        self._entities = self._generate_entities().entities  # TODO ignoring if entity-gen changed tiles
+        self._entities = self._generate_entities()
 
         return GeneratorOutput(self._entities, self._tiles)
 
     # this method mostly exists on its own for easy overriding (for handmade rooms, etc)
-    def _generate_entities(self) -> GeneratorOutput:
-        return EntityGenerator().generate(self.entity_budget, self._tiles)
+    def _generate_entities(self) -> List[Entity]:
+        return EntityGenerator().generate(self.entity_budget, self._tiles).entities
 
     # implement in subclass - this is a test output
     def _generate_tiles(self) -> List[List[str]]:
