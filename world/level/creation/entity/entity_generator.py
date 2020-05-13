@@ -4,7 +4,7 @@ from typing import List, NamedTuple, Tuple
 from world.creatures.bestiary import Appearance
 from world.interactables import LevelExit, InteractionRules
 from world.level.creation import IGenerator, GeneratorOutput
-from world.level.creation._invalid_output import InvalidOutputException
+from world.level.creation.invalid_output import InvalidOutputException
 
 import logging
 logger = logging.getLogger(__name__)

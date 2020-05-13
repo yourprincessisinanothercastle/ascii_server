@@ -19,7 +19,9 @@ Rect = NamedTuple("rect", [
 
 class PathGenerator(IGenerator):
     """ Creates a level map """
-    _EMPTY_TILE = "wall"
+    _EMPTY_TILE = "wall"  # TODO change this to whatever None-type of tiles that we enable (reduce tile objects in game)
+    _WALL_TILE = "wall"
+    _IMMUTABLE_TILES = ["floor"]
     level_budget: LevelBudget
 
     # noinspection PyMethodOverriding
@@ -49,6 +51,17 @@ class PathGenerator(IGenerator):
             for n2 in range(0, dim):
                 col.append(self._EMPTY_TILE)
         return empty_map
+
+    def _raise_walls(self):
+        """ To make sure the map does not contain un-walled sections """
+        for idx, column in enumerate(self._tiles):
+            for idy, cell in enumerate(column):
+                if cell in self._IMMUTABLE_TILES:
+                    neighbours = self.get_adjacent(idx, idy)
+                    for neighbour in neighbours:
+                        if neighbour[0] is self._EMPTY_TILE:
+                            x, y = neighbour[1]
+                            self._tiles[x][y] = self._WALL_TILE
 
     def _trim_excess_tiles(self, tile_names_to_keep: List[str]):
         left, right, top, bottom = None, None, None, None

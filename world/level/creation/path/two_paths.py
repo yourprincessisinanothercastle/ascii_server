@@ -23,6 +23,7 @@ class TwoPaths(PathGenerator):
         self.level_budget = level_budget
         self._walk_path()
         self._trim_excess_tiles(self._AREA_TILES)
+        # self._raise_walls()  # TODO enable this once the game handles empty tiles
         self.draw(debug=True)
         return GeneratorOutput(tiles=self._tiles, entities=self._entities)
 

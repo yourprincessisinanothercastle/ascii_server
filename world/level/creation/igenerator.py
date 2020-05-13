@@ -24,7 +24,7 @@ class IGenerator(ABC):
     def draw(self, debug=False):
         """ preview output (debug allows non-tile names, trimmed to last char) """
         chars = dict(
-            empty='-',
+            none='-',
             wall='W',
             floor='.'
         )

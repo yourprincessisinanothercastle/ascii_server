@@ -2,7 +2,7 @@ import random
 from typing import List, Tuple
 from world.entity import Entity
 from world.interactables import LevelExit
-from world.level.creation._invalid_output import InvalidOutputException
+from world.level.creation.invalid_output import InvalidOutputException
 from world.level.tile import TILE_MAP, Tile
 from world.level.creation import GeneratorOutput, LevelGenerator
 
