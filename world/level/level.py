@@ -1,20 +1,21 @@
-from world.world import World
+from typing import TYPE_CHECKING
 from world.entity import Entity
 from world.creatures import Player
 from world.level.map import Map
 
+if TYPE_CHECKING:
+    from world.world import World
+
 import logging
-
-
 logger = logging.getLogger(__name__)
 
 
 class Level:
-    world: World
+    world: 'World'
     map: Map
     level_number: int
 
-    def __init__(self, world: World, level_generator):
+    def __init__(self, world: 'World', level_generator):
         self.world = world
         self.players = []
         self.entities = []
