@@ -34,6 +34,7 @@ class InteractionRules(NamedTuple):
 
 # scheme for parameters that interaction events use (when generic specific parameters are needed)
 class InteractionData(NamedTuple):
+    originator: 'Entity' = None
     physical_dmg: float = 0
     poison_dmg: float = 0
     fire_dmg: float = 0
@@ -87,16 +88,16 @@ class Entity:
     def set_interaction_rules(self, interaction_rules: InteractionRules):
         self._interaction_rules = interaction_rules
 
-    def interact(self, data: InteractionData, interaction_rules: InteractionRules):
+    def interact(self, interaction_event: InteractionRules, data: InteractionData = None):
         for row_idx, row in enumerate(self.HITBOX):
             for col_idx, col in enumerate(row):
                 point = (self.x + row_idx, self.y + col_idx)
                 for entity in self.floor.entities:
                     if point == (entity.x, entity.y):
-                        entity.run_interaction(data, interaction_rules, self)
+                        entity.run_interaction(interaction_event, data, self)
                         return  # only trigger once, for first encountered eligible entity
 
-    def run_interaction(self, data: InteractionData, interaction_event: InteractionRules,
+    def run_interaction(self, interaction_event: InteractionRules, data: InteractionData,
                         originator: 'Entity' = None):
         """
         Triggered when something thinks it should interact with this entity.
@@ -105,9 +106,9 @@ class Entity:
         """
         for event, condition in zip(interaction_event, self._interaction_rules):
             if event and condition:  # as in trigger is listed as True for both sides
-                return self._on_interact(data, originator, interaction_event)
+                return self._on_interact(interaction_event, data, originator)
 
-    def _on_interact(self, data: InteractionData, originator: 'Entity', interaction_event: InteractionRules):
+    def _on_interact(self, interaction_event: InteractionRules, data: InteractionData, originator: 'Entity'):
         """
         When sub-classing an interactable entity, all effect logic should come from these _on_xxx methods
         Originator is the entity that caused the event, and triggers are the conditions that caused the event to fire

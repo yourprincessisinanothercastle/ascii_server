@@ -11,8 +11,8 @@ class Explosion(Creature):
     def move(self, dx, dy):
         pass
 
-    def __init__(self):
-        super().__init__(0, 0)
+    def __init__(self, x: int = 0, y: int = 0):
+        super().__init__(x, y)
 
         self.ACTION_TIME = dict(
             die=1

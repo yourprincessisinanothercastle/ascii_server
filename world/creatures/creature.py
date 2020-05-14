@@ -180,7 +180,7 @@ class Creature(Entity):
 
     # ---------------------------------------------------------- creature default on_events
 
-    def _on_interact(self, data: InteractionData, originator: 'Entity', interaction_event: InteractionRules):
+    def _on_interact(self, interaction_event: InteractionRules, data: InteractionData, originator: 'Entity'):
         if interaction_event.trigger_hit:
             pass  # TODO add default creature stuff to take dmg, get debuffed, or die depending on data
 

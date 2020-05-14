@@ -18,8 +18,8 @@ class Projectile(Creature):
         move=.05
     )
 
-    def __init__(self):
-        super().__init__(0, 0)
+    def __init__(self, x: int = 0, y: int = 0):
+        super().__init__(x, y)
         self.direction = Creature.DIRECTIONS['left']
 
         self.fov_needs_update = True

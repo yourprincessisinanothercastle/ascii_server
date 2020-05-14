@@ -4,6 +4,7 @@ import random
 from util.field_of_view import fov
 from world.creatures.creature import Creature
 from world.creatures.projectile import Projectile
+from world.entity import InteractionData, InteractionRules
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +53,10 @@ class Player(Creature):
         fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.floor.map.update_visible)
 
     def get_next_action(self):
+        # TODO add attacks and spells
         if 'interact' in self.keys_pressed:
-            return self.interact, (None, {"interactee": self, "action": "interact"})
+            return self.interact, ([], {"data": InteractionData(originator=self),
+                                        "interaction_event": InteractionRules(trigger_use=True)})
         elif 'up' in self.keys_pressed:
             return self.move, ((0, -1), {})
         elif 'down' in self.keys_pressed:
@@ -131,9 +134,9 @@ class Player(Creature):
             self.y += dy
 
     def shoot(self):
-        p = Projectile()
+        p = Projectile(self.x, self.y)
         p.shoot(self.direction)
-        self.floor.spawn_creature(p, self.x, self.y)
+        self.floor.spawn_entity(p)
 
     def get_client_info(self):
         return {
