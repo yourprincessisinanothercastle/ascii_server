@@ -1,16 +1,21 @@
-
+from world.world import World
 from world.entity import Entity
 from world.creatures import Player
 from world.level.map import Map
 
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 
 class Level:
+    world: World
     map: Map
+    level_number: int
 
-    def __init__(self, level_generator):
+    def __init__(self, world: World, level_generator):
+        self.world = world
         self.players = []
         self.entities = []
 
@@ -43,13 +48,12 @@ class Level:
                 player.update_fov()
             self.field_of_view_needs_update = False
 
-    def init(self):
+    def init(self, level_nr: int):
+        self.level_number = level_nr
         self.map = Map(self.level_generator)
         for entity in self.map.entities:
-            # todo: base on data from generator
             logger.info('adding %s at %s, %s' % (entity, entity.x, entity.y))
             self.spawn_entity(entity)
-        self.map.get_player_spawn()  # TODO remove this call, its just for quick testing
 
     def remove_entity(self, entity: Entity):
         logger.info('removing entity %s from level: %s' % (entity, self))
@@ -65,16 +69,25 @@ class Level:
         entity.floor = self
         self.entities.append(entity)
 
-    def spawn_player(self, player: Player):
+    def spawn_player(self, player: Player, coming_from_level_nr: int = None):
         logger.info('adding player %s to level %s' % (player, self))
         if player.floor:
             player.floor.remove_entity(player)
         player.floor = self
         self.players.append(player)
-        x, y = self.map.get_player_spawn()
+        x, y = self.map.get_player_spawn(coming_from_level_nr)
         player.set_coords(x, y)
     
     def remove_player(self, player: Entity):
         logger.info('removing player %s from level: %s' % (player, self))
         self.players.remove(player)
         player.floor = None
+
+    def exit_entity(self, entity: Entity, to_level_nr: int, from_level_nr: int):
+        level = self.world.get_level(to_level_nr)
+        if isinstance(entity, Player):
+            self.remove_player(entity)
+            level.spawn_player(entity, from_level_nr)
+        else:
+            self.remove_entity(entity)
+            level.spawn_entity(entity, from_level_nr)

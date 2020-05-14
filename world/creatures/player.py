@@ -23,7 +23,8 @@ class Player(Creature):
 
     ACTION_TIME = dict(
         move=.10,
-        hit=.20
+        hit=.20,
+        interact=.10,
     )
 
     def __init__(self, websocket):
@@ -51,7 +52,9 @@ class Player(Creature):
         fov(self.x + self.FOV_OFFSET[0], self.y + self.FOV_OFFSET[1], self.view_radius, self.floor.map.update_visible)
 
     def get_next_action(self):
-        if 'up' in self.keys_pressed:
+        if 'interact' in self.keys_pressed:
+            return self.interact, (None, {"interactee": self, "action": "interact"})
+        elif 'up' in self.keys_pressed:
             return self.move, ((0, -1), {})
         elif 'down' in self.keys_pressed:
             return self.move, ((0, 1), {})
@@ -59,6 +62,7 @@ class Player(Creature):
             return self.move, ((-1, 0), {})
         elif 'right' in self.keys_pressed:
             return self.move, ((1, 0), {})
+
 
     def process_action_queue(self, time_delta: float):
         """

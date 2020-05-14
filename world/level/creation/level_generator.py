@@ -1,7 +1,7 @@
 import math
 import random
 from typing import Type, List, Tuple
-from world.creatures import Creature, Blob, Skeleton, Bestiary
+from world.creatures import Bestiary
 from world.creatures.bestiary import Appearance
 from world.level.creation import IGenerator, GeneratorOutput, LevelBudget
 from world.level.creation.area import SquareRoom, AreaGenerator

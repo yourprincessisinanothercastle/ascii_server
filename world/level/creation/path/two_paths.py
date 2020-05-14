@@ -28,8 +28,8 @@ class TwoPaths(PathGenerator):
         return GeneratorOutput(tiles=self._tiles, entities=self._entities)
 
     # TODO remove test function
-    def fake_gen(self, tp=160):
-        l = LevelBudget(monster_pool=[], entity_points=tp, tile_points=tp, area_pool=[SquareRoom], area_weight=[1])
+    def fake_gen(self, tp=160, lvl=1):
+        l = LevelBudget(level_number=lvl, monster_pool=[], entity_points=tp, tile_points=tp, area_pool=[SquareRoom], area_weight=[1])
         return self.generate(l)
 
     def _get_area_monster_pool(self):
@@ -120,7 +120,7 @@ class TwoPaths(PathGenerator):
                 elif is_end_area:
                     level_connect_number = self.level_budget.level_number + 1
                 else:
-                    level_connect_number = -1
+                    level_connect_number = -1  # no exit
                 area_budget = AreaBudget(tile_points=area_points_list[area_cntr],
                                          doorways=[])  # we don't ask to gen doors, as we will open them up from here
                 entity_budget = EntityBudget(entity_points=entity_points_list[area_cntr],

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Tuple, List
 
 from util.coord_helpers import distance
 from util.field_of_view import fov
-from world.entity import Entity, ENTITY_TYPE
+from world.entity import Entity, ENTITY_TYPE, InteractionRules, InteractionData
 
 if TYPE_CHECKING:
     from world.creatures import Player
@@ -15,16 +15,11 @@ class Creature(Entity):
     """
     something that could move every tick
     """
-    DIRECTIONS = dict(
-        up='up',
-        down='down',
-        left='left',
-        right='right',
-    )
 
     ACTION_TIME = dict(
         move=.10,
-        attack=.20
+        attack=.20,
+        interact=1.00,
     )
 
     def __init__(self, x: int, y: int,
@@ -39,7 +34,7 @@ class Creature(Entity):
         self.current_action: Tuple = ()  # ( method, (args,) )
         self.current_action_time: int = 0
         
-        self.direction = Creature.DIRECTIONS['right']
+        self.direction = Entity.DIRECTIONS['right']
 
         self.view_radius = view_radius
         self.update_sent = False
@@ -49,6 +44,9 @@ class Creature(Entity):
 
         self.life = life
         self.damage = damage
+
+        # default interaction - set to some specific per creature class if wanted (or in generator for uniques)
+        self.set_interaction_rules(InteractionRules(trigger_hit=True, trigger_aoe=True))
 
     def is_visible(self):
         for row_idx, row in enumerate(self.HITBOX):
@@ -179,6 +177,12 @@ class Creature(Entity):
             self.action_queue = []
         self.action_queue.append(action)
         self.action_queue = self.action_queue[:3]
+
+    # ---------------------------------------------------------- creature default on_events
+
+    def _on_interact(self, data: InteractionData, originator: 'Entity', interaction_event: InteractionRules):
+        if interaction_event.trigger_hit:
+            pass  # TODO add default creature stuff to take dmg, get debuffed, or die depending on data
 
     # ---------------------------------------------------------- creature default behavior
 

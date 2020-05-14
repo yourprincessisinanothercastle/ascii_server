@@ -13,8 +13,7 @@ TILE_SIZE = 3
 
 
 class Map:
-    def __init__(self, level_generator: LevelGenerator = None):
-        # todo: connections between levels
+    def __init__(self, level_generator: LevelGenerator):
         self._level_generator: LevelGenerator = level_generator
         self._map: GeneratorOutput = self._level_generator.generate()
         self.entities: List[Entity] = self._map.entities
@@ -118,7 +117,7 @@ class Map:
                         entrance = entity
                 else:
                     if not entrance or entrance.level_number > entity.level_number:
-                        entrance = entity
+                        entrance = entity  # assume we want to spawn coming from the lowest number
 
         if not entrance:
             raise InvalidOutputException("No exit matched as entrance, cannot choose spawn area")

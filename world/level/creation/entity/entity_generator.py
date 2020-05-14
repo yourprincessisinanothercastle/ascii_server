@@ -2,7 +2,8 @@ import random
 from typing import List, NamedTuple, Tuple
 
 from world.creatures.bestiary import Appearance
-from world.interactables import LevelExit, InteractionRules
+from world.entity import InteractionRules
+from world.interactables import LevelExit
 from world.level.creation import IGenerator, GeneratorOutput
 from world.level.creation.invalid_output import InvalidOutputException
 
@@ -61,7 +62,7 @@ class EntityGenerator(IGenerator):
                         reserved_tiles.append(idx)
                 if len(reserved_tiles) >= minimum_spawn_area:
                     # disables exits that go up from start-level
-                    rules = InteractionRules(trigger_interact_key=(self.entity_budget.level_connect_number > 0))
+                    rules = InteractionRules(trigger_use=(self.entity_budget.level_connect_number > 0))
                     self._entities.append(LevelExit(pos[0], pos[1],
                                                     self.entity_budget.level_connect_number,
                                                     interaction_rules=rules))
