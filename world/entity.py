@@ -103,7 +103,7 @@ class Entity:
             for col_idx, col in enumerate(row):
                 if col:
                     target_tile = self.floor.map.get_tile(self.y + row_idx, self.x + col_idx)
-                    if target_tile.is_visible:
+                    if target_tile and target_tile.is_visible:
                         self.last_seen_at = (self.x, self.y)
                         return True
         return False

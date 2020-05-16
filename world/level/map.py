@@ -7,6 +7,7 @@ from world.level.tile import TILE_MAP, Tile
 from world.level.creation import GeneratorOutput, LevelGenerator
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 TILE_SIZE = 3
@@ -17,16 +18,16 @@ class Map:
         self._level_generator: LevelGenerator = level_generator
         self._map: GeneratorOutput = self._level_generator.generate()
         self.entities: List[Entity] = self._map.entities
-        self.tiles: dict = self._tiles_from_map_json()
+        self.tiles: dict = self.make_game_map()
 
     def get_tile(self, row, col) -> Tile or None:
         """ allows for out of bounds lookup, to enable sweeping checks """
         try:
             return self.tiles[row][col]
-        except IndexError:
+        except KeyError:
             return None
 
-    def _tiles_from_map_json(self) -> dict:
+    def make_game_map(self) -> dict:
         result = {}
 
         for map_row_idx, row in enumerate(self._map.tiles):
@@ -43,6 +44,11 @@ class Map:
                         tile_class_at_index = TILE_MAP[tile_type_at_index]
 
                         result[tile_row_idx][tile_col_idx] = tile_class_at_index()
+
+        for entity in self.entities:
+            entity.x = entity.x * TILE_SIZE + random.randrange(TILE_SIZE)
+            entity.y = entity.y * TILE_SIZE + random.randrange(TILE_SIZE)
+
         return result
 
     def serialize_init_state(self):
@@ -122,7 +128,7 @@ class Map:
         if not entrance:
             raise InvalidOutputException("No exit matched as entrance, cannot choose spawn area")
         else:
-            viable_tiles = list(filter(lambda a: bool(a),  self.get_adjacent(entrance.x, entrance.y)))
+            viable_tiles = list(filter(lambda a: bool(a), self.get_adjacent(entrance.x, entrance.y)))
             spawn_area = random.choice(viable_tiles)[1]
             return spawn_area
 

@@ -30,4 +30,11 @@ def gen_map(generator_name):
     generator.draw()
 
 
+
+@cli.command()
+def print_world():
+    from world.world import World
+    World()
+
+
 cli()

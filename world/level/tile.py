@@ -10,23 +10,26 @@ class Tile:
         self.is_visible = False
         self.seen = False
 
+        # debug stuff
+        self.is_target = False
+
     def serialize_attributes(self):
         """
         serialize the stuff the client needs to know about this tile
 
         :return: 
         """
-        return self.seen, self.is_visible
+        return self.seen, self.is_visible, self.is_target
         
         
 class Wall(Tile):
-    name = TILE_NAMES["floor"]
+    name = TILE_NAMES["wall"]
     blocked = True
     block_sight = True
 
 
 class Floor(Tile):
-    name = TILE_NAMES["wall"]
+    name = TILE_NAMES["floor"]
     blocked = False
     block_sight = False
 
