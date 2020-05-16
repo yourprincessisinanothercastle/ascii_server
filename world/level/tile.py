@@ -1,4 +1,5 @@
-TILE_NAMES = dict(floor="floor", wall="wall")  # TODO use python Enum('Tile', 'floor wall')
+TILE_NAMES = dict(floor="floor", wall="wall", empty="empty")  # TODO use python Enum('Tile', 'floor wall')
+
 
 class Tile:
     name = None
@@ -20,8 +21,8 @@ class Tile:
         :return: 
         """
         return self.seen, self.is_visible, self.is_target
-        
-        
+
+
 class Wall(Tile):
     name = TILE_NAMES["wall"]
     blocked = True
@@ -34,6 +35,12 @@ class Floor(Tile):
     block_sight = False
 
 
+class Empty(Tile):
+    name = TILE_NAMES["empty"]
+    blocked = True
+    block_sight = False
+
+
 # match the tiles from map generator to actual tiles
 # {'floor': Floor, ...}
-TILE_MAP = {tile_class.name: tile_class for tile_class in [Wall, Floor]}
+TILE_MAP = {tile_class.name: tile_class for tile_class in [Wall, Floor, Empty]}

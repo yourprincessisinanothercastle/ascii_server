@@ -19,7 +19,7 @@ Rect = NamedTuple("rect", [
 
 class PathGenerator(IGenerator):
     """ Creates a level map """
-    _EMPTY_TILE = "wall"  # TODO change this to whatever None-type of tiles that we enable (reduce tile objects in game)
+    _EMPTY_TILE = "empty"
     _WALL_TILE = "wall"
     _IMMUTABLE_TILES = ["floor"]
     level_budget: LevelBudget

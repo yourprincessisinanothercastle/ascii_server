@@ -23,7 +23,7 @@ class Player(Creature):
     FOV_OFFSET = (1, 1)
 
     ACTION_TIME = dict(
-        move=.10,
+        move=.05,
         hit=.20,
         interact=.10,
     )
