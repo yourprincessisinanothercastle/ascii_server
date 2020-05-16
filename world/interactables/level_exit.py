@@ -15,6 +15,8 @@ class LevelExit(Entity):
         self.level_number = level_number
         self.sprite_name = 'level_exit'
 
+
+
     def _on_interact(self, interaction_event: InteractionRules, data: InteractionData, originator: 'Entity'):
         if originator:
             self.floor.exit_entity(entity=originator,
