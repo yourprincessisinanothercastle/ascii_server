@@ -35,7 +35,7 @@ class PathGenerator(IGenerator):
                               self.level_budget.area_weight,
                               k=area_count)
 
-    def _get_empty_map(self, total_area_budget_points: int, padding_factor: float = 5) -> List[List[str]]:
+    def _get_empty_map(self, total_area_budget_points: int, padding_factor: float = 15) -> List[List[str]]:
         """
         While ad-hoc, we base the initial map on squaring and padding the levels tile budget points
         TODO this will cause a lot of empty space - override this default function to slim down the maps
@@ -43,7 +43,7 @@ class PathGenerator(IGenerator):
         The idea is that it's up to each path generator to translate area points into a real map, depending on what
         you want the path_generator to create.
         """
-        dim = math.ceil(math.sqrt(total_area_budget_points) * padding_factor)
+        dim = math.ceil(math.sqrt(total_area_budget_points) * padding_factor) * 2
         empty_map = []
         for n1 in range(0, dim):
             col = []

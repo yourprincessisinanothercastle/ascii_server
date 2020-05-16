@@ -55,7 +55,9 @@ class Creature(Entity):
             self.x += dx
             self.y += dy
 
+
     # ---------------------------------------------------------- creature default on_events
+
 
     def _on_interact(self, interaction_event: InteractionRules, data: InteractionData, originator: 'Entity'):
         if interaction_event.trigger_hit:

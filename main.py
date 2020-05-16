@@ -33,8 +33,13 @@ def gen_map(generator_name):
 
 @cli.command()
 def print_world():
+    init_logging('info')
     from world.world import World
-    World()
+    w = World()
+
+    for x in range(1,1000):
+        print('!!!!!')
+        w.create_level(x)
 
 
 cli()

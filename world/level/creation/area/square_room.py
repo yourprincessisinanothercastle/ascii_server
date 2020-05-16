@@ -13,7 +13,7 @@ class SquareRoom(AreaGenerator):
         F = 'floor'
 
         area = []
-        tiles = round(math.sqrt(self.area_budget.tile_points))
+        tiles = round(math.sqrt(self.area_budget.tile_points) * 1.5)
         for x in range(0, tiles):
             col = []
             area.append(col)

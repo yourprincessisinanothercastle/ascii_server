@@ -53,16 +53,16 @@ class Level:
         self.level_number = level_nr
         self.map = Map(self.level_generator)
         for entity in self.map.entities:
-            logger.info('adding %s at %s, %s' % (entity, entity.x, entity.y))
+            logger.debug('adding %s at %s, %s' % (entity, entity.x, entity.y))
             self.spawn_entity(entity)
 
     def remove_entity(self, entity: Entity):
-        logger.info('removing entity %s from level: %s' % (entity, self))
+        logger.debug('removing entity %s from level: %s' % (entity, self))
         self.entities.remove(entity)
         entity.floor = None
 
     def spawn_entity(self, entity: Entity):
-        logger.info('adding entity %s to level: %s' % (entity, self))
+        logger.debug('adding entity %s to level: %s' % (entity, self))
         # this will only attach an entity to current game-level, coordinates should already be generated within it
         # TODO add func to spawn entity at player spawn areas if they somehow move between levels - IF we allow this
         if entity.floor:
@@ -82,7 +82,7 @@ class Level:
         player.client_needs_init = True
     
     def remove_player(self, player: Entity):
-        logger.info('removing player %s from level: %s' % (player, self))
+        logger.debug('removing player %s from level: %s' % (player, self))
         self.players.remove(player)
         player.floor = None
 

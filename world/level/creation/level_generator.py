@@ -81,8 +81,8 @@ class LevelGenerator(IGenerator):
         This basically gets us a rising flattening curve, closing in on plateau quickly.
         Eventually the scaling will mostly come from incrementing by current level, before reaching the hard cap
         """
-        soft_bound = GLOBAL_VALUE_INDEX * 4  # sets the tone of increase early on, slowing down significantly after a few levels
-        hard_cap = GLOBAL_VALUE_INDEX * 6
+        soft_bound = GLOBAL_VALUE_INDEX * 6  # sets the tone of increase early on, slowing down significantly after a few levels
+        hard_cap = GLOBAL_VALUE_INDEX * 10
         progression = soft_bound - (soft_bound / (level_nr + 1) * 1.2) + level_nr  # flat progression
         progression *= random.uniform(*random_offset)  # should result in +/- areas generated compared to static formula
         return math.ceil(progression) if progression < hard_cap else hard_cap

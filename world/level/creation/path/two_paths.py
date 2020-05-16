@@ -27,11 +27,6 @@ class TwoPaths(PathGenerator):
         self.draw(debug=True)
         return GeneratorOutput(tiles=self._tiles, entities=self._entities)
 
-    # TODO remove test function
-    def fake_gen(self, tp=160, lvl=1):
-        l = LevelBudget(level_number=lvl, monster_pool=[], entity_points=tp, tile_points=tp, area_pool=[SquareRoom], area_weight=[1])
-        return self.generate(l)
-
     def _get_area_monster_pool(self):
         # TODO make distinctions for different monsters per area
         return self.level_budget.monster_pool
