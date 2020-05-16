@@ -80,6 +80,7 @@ class Entity:
         self.y = y
 
         self.update_sent = False
+        self.client_needs_init = False
         self.last_seen_at = None  # (0, 0)
 
         self.action_queue: List[Tuple] = []

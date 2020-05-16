@@ -78,6 +78,8 @@ class Level:
         self.players.append(player)
         x, y = self.map.get_player_spawn(coming_from_level_nr)
         player.set_coords(x, y)
+        
+        player.client_needs_init = True
     
     def remove_player(self, player: Entity):
         logger.info('removing player %s from level: %s' % (player, self))

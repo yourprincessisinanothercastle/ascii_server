@@ -92,13 +92,19 @@ async def game_loop(app):
             ex = player.websocket.exception()
             if ex:
                 logger.error("exception: %s" % ex)
-            update_data = player.get_client_update_data()
-            if update_data:
-                try:
-                    await player.websocket.send_str(json.dumps({'type': 'update', 'data': update_data}))
-                except Exception as e:
-                    logger.error(e)
-                    await remove_player(app, player)
+            try:
+                if player.client_needs_init:
+                    await player.websocket.send_str(json.dumps({
+                        'type': 'init',
+                        'data': player.get_client_init_data()}))
+                    player.client_needs_init = False
+                else:
+                    update_data = player.get_client_update_data()
+                    if update_data: 
+                        await player.websocket.send_str(json.dumps({'type': 'update', 'data': update_data}))
+            except Exception as e:
+                logger.error(e)
+                await remove_player(app, player)
 
         for player in app["players"]:
             player.update_sent = True
