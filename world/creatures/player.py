@@ -109,7 +109,6 @@ class Player(Creature):
         for row_idx, row in enumerate(self.HITBOX):
             for col_idx, col in enumerate(row):
                 if col:  # dont collide on Nones
-
                     target_tile = self.floor.map.get_tile(self.y + row_idx + dy, self.x + col_idx + dx)
                     #print(f'bump {self.x + col_idx + dx},{self.y + row_idx + dy}!')
                     #print(target_tile)

@@ -128,7 +128,7 @@ class Map:
         if not entrance:
             raise InvalidOutputException("No exit matched as entrance, cannot choose spawn area")
         else:
-            viable_tiles = list(filter(lambda a: bool(a), self.get_adjacent(entrance.x, entrance.y)))
+            viable_tiles = list(filter(lambda a: bool(a),  self.get_adjacent(entrance.x, entrance.y)))
             spawn_area = random.choice(viable_tiles)[1]
             return spawn_area
 
